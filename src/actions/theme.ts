@@ -37,7 +37,8 @@ export async function toggleTheme() {
 export async function syncWithLocalTheme() {
   const { local } = await getCurrentTheme();
   if (!local) {
-    setTheme("system");
+    // Leitstand-Design: Dark ist der Standardmodus
+    await setTheme("dark");
     return;
   }
 

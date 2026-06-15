@@ -9,12 +9,14 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SecondRouteImport } from './routes/second'
+import { Route as EinstellungenRouteImport } from './routes/einstellungen'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProzesseIndexRouteImport } from './routes/prozesse.index'
+import { Route as ProzesseProcessIdRouteImport } from './routes/prozesse.$processId'
 
-const SecondRoute = SecondRouteImport.update({
-  id: '/second',
-  path: '/second',
+const EinstellungenRoute = EinstellungenRouteImport.update({
+  id: '/einstellungen',
+  path: '/einstellungen',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -22,40 +24,63 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProzesseIndexRoute = ProzesseIndexRouteImport.update({
+  id: '/prozesse/',
+  path: '/prozesse/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProzesseProcessIdRoute = ProzesseProcessIdRouteImport.update({
+  id: '/prozesse/$processId',
+  path: '/prozesse/$processId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/second': typeof SecondRoute
+  '/einstellungen': typeof EinstellungenRoute
+  '/prozesse/$processId': typeof ProzesseProcessIdRoute
+  '/prozesse/': typeof ProzesseIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/second': typeof SecondRoute
+  '/einstellungen': typeof EinstellungenRoute
+  '/prozesse/$processId': typeof ProzesseProcessIdRoute
+  '/prozesse': typeof ProzesseIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/second': typeof SecondRoute
+  '/einstellungen': typeof EinstellungenRoute
+  '/prozesse/$processId': typeof ProzesseProcessIdRoute
+  '/prozesse/': typeof ProzesseIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/second'
+  fullPaths: '/' | '/einstellungen' | '/prozesse/$processId' | '/prozesse/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/second'
-  id: '__root__' | '/' | '/second'
+  to: '/' | '/einstellungen' | '/prozesse/$processId' | '/prozesse'
+  id:
+    | '__root__'
+    | '/'
+    | '/einstellungen'
+    | '/prozesse/$processId'
+    | '/prozesse/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  SecondRoute: typeof SecondRoute
+  EinstellungenRoute: typeof EinstellungenRoute
+  ProzesseProcessIdRoute: typeof ProzesseProcessIdRoute
+  ProzesseIndexRoute: typeof ProzesseIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/second': {
-      id: '/second'
-      path: '/second'
-      fullPath: '/second'
-      preLoaderRoute: typeof SecondRouteImport
+    '/einstellungen': {
+      id: '/einstellungen'
+      path: '/einstellungen'
+      fullPath: '/einstellungen'
+      preLoaderRoute: typeof EinstellungenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -65,12 +90,28 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/prozesse/': {
+      id: '/prozesse/'
+      path: '/prozesse'
+      fullPath: '/prozesse/'
+      preLoaderRoute: typeof ProzesseIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/prozesse/$processId': {
+      id: '/prozesse/$processId'
+      path: '/prozesse/$processId'
+      fullPath: '/prozesse/$processId'
+      preLoaderRoute: typeof ProzesseProcessIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  SecondRoute: SecondRoute,
+  EinstellungenRoute: EinstellungenRoute,
+  ProzesseProcessIdRoute: ProzesseProcessIdRoute,
+  ProzesseIndexRoute: ProzesseIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

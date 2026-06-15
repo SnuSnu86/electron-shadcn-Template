@@ -1,0 +1,31 @@
+import {
+  createProcess,
+  deleteParameter,
+  deleteProcess,
+  getProcess,
+  listCategories,
+  listParameters,
+  listProcesses,
+  listTags,
+  listTechnicalArtifacts,
+  replaceTechnicalArtifacts,
+  toggleFavorite,
+  updateProcess,
+  upsertParameter,
+} from "./handlers";
+
+export const catalog = {
+  listProcesses,
+  getProcess,
+  createProcess,
+  updateProcess,
+  deleteProcess,
+  toggleFavorite,
+  listCategories,
+  listTags,
+  listParameters,
+  upsertParameter,
+  deleteParameter,
+  listTechnicalArtifacts,
+  replaceTechnicalArtifacts,
+};

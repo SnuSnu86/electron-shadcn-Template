@@ -5,7 +5,6 @@ import {
   installExtension,
   REACT_DEVELOPER_TOOLS,
 } from "electron-devtools-installer";
-import { UpdateSourceType, updateElectronApp } from "update-electron-app";
 import { ipcContext } from "@/ipc/context";
 import { IPC_CHANNELS, inDevelopment } from "./constants";
 import { getBasePath } from "./utils/path";
@@ -14,12 +13,15 @@ function createWindow() {
   const basePath = getBasePath();
   const preload = path.join(basePath, "preload.js");
   const mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1480,
+    height: 920,
+    minWidth: 1080,
+    minHeight: 680,
+    backgroundColor: "#0a0c10",
     webPreferences: {
       devTools: inDevelopment,
       contextIsolation: true,
-      nodeIntegration: true,
+      nodeIntegration: false,
       nodeIntegrationInSubFrames: false,
 
       preload,
@@ -48,13 +50,18 @@ async function installExtensions() {
   }
 }
 
-function checkForUpdates() {
-  updateElectronApp({
-    updateSource: {
-      type: UpdateSourceType.ElectronPublicUpdateService,
-      repo: "LuanRoger/electron-shadcn",
-    },
-  });
+async function setupDatabase() {
+  const { getDb } = await import("./main/db/database");
+  const { failOrphanedRuns } = await import("./main/db/repository");
+  const { seedIfEmpty } = await import("./main/db/seed");
+  const { bootstrapRealProcesses } = await import(
+    "./main/db/seed-servicegrad"
+  );
+
+  getDb();
+  seedIfEmpty();
+  bootstrapRealProcesses();
+  failOrphanedRuns();
 }
 
 async function setupORPC() {
@@ -70,9 +77,9 @@ async function setupORPC() {
 
 app.whenReady().then(async () => {
   try {
+    await setupDatabase();
     createWindow();
     await installExtensions();
-    checkForUpdates();
     await setupORPC();
   } catch (error) {
     console.error("Error during app initialization:", error);
