@@ -1,3 +1,4 @@
+import { mkdirSync } from "node:fs";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { app } from "electron";
@@ -105,12 +106,15 @@ CREATE INDEX IF NOT EXISTS idx_artifacts_process ON process_technical_artifacts(
 `;
 
 export function getDbPath(): string {
-  return path.join(app.getPath("userData"), "jozi-control-center.db");
+  const portableDataDir = process.env.JOZI_PORTABLE_DATA_DIR;
+  return path.join(portableDataDir || app.getPath("userData"), "jozi-control-center.db");
 }
 
 export function getDb(): DatabaseSync {
   if (!db) {
-    db = new DatabaseSync(getDbPath());
+    const dbPath = getDbPath();
+    mkdirSync(path.dirname(dbPath), { recursive: true });
+    db = new DatabaseSync(dbPath);
     db.exec("PRAGMA journal_mode = WAL");
     db.exec("PRAGMA foreign_keys = ON");
     db.exec(SCHEMA);

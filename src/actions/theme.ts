@@ -2,47 +2,69 @@ import { LOCAL_STORAGE_KEYS } from "@/constants";
 import { ipc } from "@/ipc/manager";
 import type { ThemeMode } from "@/types/theme-mode";
 
+export const DEFAULT_THEME: ThemeMode = "system";
+
 export interface ThemePreferences {
   local: ThemeMode | null;
-  system: ThemeMode;
+  source: ThemeMode;
 }
 
-export async function getCurrentTheme(): Promise<ThemePreferences> {
-  const currentTheme = await ipc.client.theme.getCurrentThemeMode();
+export function resolveIsDarkMode(mode: ThemeMode): boolean {
+  if (mode === "dark") {
+    return true;
+  }
+  if (mode === "light") {
+    return false;
+  }
+  return window.matchMedia("(prefers-color-scheme: dark)").matches;
+}
+
+export function getStoredTheme(): ThemeMode {
   const localTheme = localStorage.getItem(
     LOCAL_STORAGE_KEYS.THEME
   ) as ThemeMode | null;
 
+  if (localTheme === "dark" || localTheme === "light" || localTheme === "system") {
+    return localTheme;
+  }
+
+  return DEFAULT_THEME;
+}
+
+export async function getCurrentTheme(): Promise<ThemePreferences> {
+  const currentTheme = await ipc.client.theme.getCurrentThemeMode();
+
   return {
-    system: currentTheme,
-    local: localTheme,
+    source: currentTheme,
+    local: getStoredTheme(),
   };
 }
 
 export async function setTheme(newTheme: ThemeMode) {
-  const isDarkMode = newTheme === "dark";
   await ipc.client.theme.setThemeMode(newTheme);
   localStorage.setItem(LOCAL_STORAGE_KEYS.THEME, newTheme);
-  updateDocumentTheme(isDarkMode);
-}
-
-export async function toggleTheme() {
-  const isDarkMode = await ipc.client.theme.toggleThemeMode();
-  const newTheme = isDarkMode ? "dark" : "light";
-
-  updateDocumentTheme(isDarkMode);
-  localStorage.setItem(LOCAL_STORAGE_KEYS.THEME, newTheme);
+  updateDocumentTheme(resolveIsDarkMode(newTheme));
 }
 
 export async function syncWithLocalTheme() {
-  const { local } = await getCurrentTheme();
-  if (!local) {
-    // Leitstand-Design: Dark ist der Standardmodus
-    await setTheme("dark");
-    return;
-  }
+  await setTheme(getStoredTheme());
+}
 
-  await setTheme(local);
+export function applyStoredTheme() {
+  updateDocumentTheme(resolveIsDarkMode(getStoredTheme()));
+}
+
+export function subscribeToSystemThemeChanges(onChange: () => void) {
+  const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+  const handler = () => {
+    if (getStoredTheme() === "system") {
+      onChange();
+    }
+  };
+
+  mediaQuery.addEventListener("change", handler);
+  return () => mediaQuery.removeEventListener("change", handler);
 }
 
 function updateDocumentTheme(isDarkMode: boolean) {

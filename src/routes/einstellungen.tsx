@@ -9,7 +9,7 @@ import {
   ShieldIcon,
 } from "lucide-react";
 import { toast } from "sonner";
-import ToggleTheme from "@/components/toggle-theme";
+import ThemeSelector from "@/components/theme-selector";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -172,12 +172,12 @@ function SettingsPage() {
         <CardHeader>
           <CardTitle className="font-display text-sm">Darstellung</CardTitle>
           <CardDescription>
-            Der Leitstand ist für den dunklen Modus entworfen — heller Modus ist
-            verfügbar.
+            Standard ist „System“ — die App folgt den OS-Einstellungen. Dunkel
+            und hell sind manuell wählbar.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <ToggleTheme />
+          <ThemeSelector />
         </CardContent>
       </Card>
     </div>

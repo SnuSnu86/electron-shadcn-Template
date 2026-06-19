@@ -4,7 +4,11 @@ import React, { useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { syncWithLocalTheme } from "./actions/theme";
+import {
+  applyStoredTheme,
+  subscribeToSystemThemeChanges,
+  syncWithLocalTheme,
+} from "./actions/theme";
 import { router } from "./utils/routes";
 import "./localization/i18n";
 
@@ -20,6 +24,8 @@ const queryClient = new QueryClient({
 export default function App() {
   useEffect(() => {
     syncWithLocalTheme();
+
+    return subscribeToSystemThemeChanges(applyStoredTheme);
   }, []);
 
   return (
