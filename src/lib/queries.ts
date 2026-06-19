@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ipc } from "@/ipc/manager";
-import type { UserRole } from "@/shared/domain";
 
 type Client = typeof ipc.client;
 
@@ -27,7 +26,6 @@ export const queryKeys = {
   logs: (runId: number) => ["logs", runId] as const,
   tutorial: (processId: number) => ["tutorial", processId] as const,
   dashboard: ["dashboard"] as const,
-  role: ["role"] as const,
 };
 
 export function useProcesses(filter?: ProcessFilterInput) {
@@ -77,13 +75,6 @@ export function useDashboard() {
     queryKey: queryKeys.dashboard,
     queryFn: () => ipc.client.workspace.getDashboardStats(),
     refetchInterval: 5000,
-  });
-}
-
-export function useRole() {
-  return useQuery({
-    queryKey: queryKeys.role,
-    queryFn: () => ipc.client.workspace.getRole(),
   });
 }
 
@@ -164,14 +155,5 @@ export function useCancelRun() {
       queryClient.invalidateQueries({ queryKey: queryKeys.logs(runId) });
       queryClient.invalidateQueries({ queryKey: ["runs"] });
     },
-  });
-}
-
-export function useSetRole() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (role: UserRole) => ipc.client.workspace.setRole({ role }),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: queryKeys.role }),
   });
 }

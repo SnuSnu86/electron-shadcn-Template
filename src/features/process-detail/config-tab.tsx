@@ -212,13 +212,7 @@ function ParameterEditorDialog({
   );
 }
 
-export function ConfigTab({
-  process,
-  canEdit,
-}: {
-  process: ProcessDetail;
-  canEdit: boolean;
-}) {
+export function ConfigTab({ process }: { process: ProcessDetail }) {
   const { data: parameters } = useParameters(process.id);
   const invalidate = useInvalidateProcessData();
   const [editorDraft, setEditorDraft] = useState<ParamDraft | null>(null);
@@ -262,12 +256,10 @@ export function ConfigTab({
               überschreibbar.
             </p>
           </div>
-          {canEdit && (
-            <Button onClick={() => openEditor()} size="sm" variant="outline">
-              <PlusIcon data-icon="inline-start" />
-              Parameter
-            </Button>
-          )}
+          <Button onClick={() => openEditor()} size="sm" variant="outline">
+            <PlusIcon data-icon="inline-start" />
+            Parameter
+          </Button>
         </div>
         <CardContent className="p-0">
           <Table>
@@ -279,7 +271,7 @@ export function ConfigTab({
                 <TableHead>Standardwert</TableHead>
                 <TableHead>Gruppe</TableHead>
                 <TableHead>Pflicht</TableHead>
-                {canEdit && <TableHead className="w-20" />}
+                <TableHead className="w-20" />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -287,7 +279,7 @@ export function ConfigTab({
                 <TableRow>
                   <TableCell
                     className="h-24 text-center text-muted-foreground"
-                    colSpan={canEdit ? 7 : 6}
+                    colSpan={7}
                   >
                     Keine Parameter definiert.
                   </TableCell>
@@ -328,27 +320,25 @@ export function ConfigTab({
                       <span className="text-muted-foreground">Nein</span>
                     )}
                   </TableCell>
-                  {canEdit && (
-                    <TableCell>
-                      <div className="flex gap-1">
-                        <Button
-                          onClick={() => openEditor(param)}
-                          size="icon-sm"
-                          variant="ghost"
-                        >
-                          <PencilIcon />
-                        </Button>
-                        <Button
-                          className="text-destructive"
-                          onClick={() => remove(param)}
-                          size="icon-sm"
-                          variant="ghost"
-                        >
-                          <Trash2Icon />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  )}
+                  <TableCell>
+                    <div className="flex gap-1">
+                      <Button
+                        onClick={() => openEditor(param)}
+                        size="icon-sm"
+                        variant="ghost"
+                      >
+                        <PencilIcon />
+                      </Button>
+                      <Button
+                        className="text-destructive"
+                        onClick={() => remove(param)}
+                        size="icon-sm"
+                        variant="ghost"
+                      >
+                        <Trash2Icon />
+                      </Button>
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -378,9 +368,12 @@ export function ConfigTab({
             </p>
           )}
           {process.action.type === "pad" && (
-            <p className="text-muted-foreground text-xs">
-              Flow: {process.action.padFlowName ?? "—"}
-            </p>
+            <div className="grid gap-1 font-mono text-muted-foreground text-xs">
+              <p>Flow: {process.action.padFlowName ?? "—"}</p>
+              <p>Environment-ID: {process.action.padEnvironmentId ?? "—"}</p>
+              <p>Workflow-ID: {process.action.padWorkflowId ?? "—"}</p>
+              <p className="break-all">URL: {process.action.padUrl ?? "—"}</p>
+            </div>
           )}
           <p className="text-[0.6875rem] text-muted-foreground">
             Platzhalter wie {"{{schluessel}}"} werden beim Start durch

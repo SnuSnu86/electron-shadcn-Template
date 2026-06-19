@@ -49,17 +49,8 @@ Läufe werden protokolliert; Ausgabe von Skripten erscheint im Lauf-Log.
 
 ### Einstellungen
 
-- **Rollenmodell** (lokal, ohne Login): Viewer, Operator, Editor
 - **Export & Backup**: alle Prozesse als JSON, Runbooks als Markdown, SQLite-Datenbank sichern
 - **Darstellung**: heller und dunkler Modus
-
-## Rollen
-
-| Rolle | Rechte |
-| --- | --- |
-| **Viewer** | Prozesse, Läufe, Logs und Tutorials ansehen |
-| **Operator** | Wie Viewer — zusätzlich Prozesse starten und abbrechen |
-| **Editor** | Vollzugriff: Prozesse, Parameter, Runbooks und Tutorials bearbeiten |
 
 ## Beispielprozess: Servicegrad-Ermittlung
 

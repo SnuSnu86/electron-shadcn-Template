@@ -4,7 +4,7 @@ Prozessdokumentation:
 
 ℹ️ **Hinweis zur Dokumentation:**
 
-Diese Dokumentation beschreibt die **Light-Version** des Servicegrad-Ermittlungsprozesses.
+Diese Dokumentation beschreibt die des Servicegrad-Ermittlungsprozesses.
 
 Ziel dieser vereinfachten Variante ist es, die Komplexität des Gesamtprozesses zu reduzieren und einen schlanken, wartbaren Automatisierungsablauf bereitzustellen.
 

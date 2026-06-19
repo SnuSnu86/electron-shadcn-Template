@@ -11,10 +11,13 @@ import type { ForgeConfig } from "@electron-forge/shared-types";
 const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
+    icon: "assets/app-icon.ico",
   },
   rebuildConfig: {},
   makers: [
-    new MakerSquirrel({}),
+    new MakerSquirrel({
+      setupIcon: "assets/app-icon.ico",
+    }),
     new MakerZIP({}, ["darwin"]),
     new MakerRpm({}),
     new MakerDeb({}),

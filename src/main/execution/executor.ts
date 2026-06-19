@@ -9,6 +9,7 @@ import {
   listParameters,
 } from "@/main/db/repository";
 import type { ProcessAction } from "@/shared/domain";
+import { resolvePadUrl } from "./pad-url";
 
 /** Aktive Kindprozesse je Run-ID, um Abbrüche zu ermöglichen. */
 const runningChildren = new Map<number, ChildProcess>();
@@ -209,7 +210,7 @@ async function executeFile(runId: number, action: ProcessAction) {
 }
 
 async function executePad(runId: number, action: ProcessAction) {
-  const url = action.padUrl || "ms-powerautomate:";
+  const url = resolvePadUrl(action);
   addLog(
     runId,
     "info",
@@ -221,7 +222,9 @@ async function executePad(runId: number, action: ProcessAction) {
     addLog(
       runId,
       "info",
-      "PAD-Konsole aufgerufen. Flow-Ausführung in der PAD-Konsole verfolgen.",
+      action.padEnvironmentId && action.padWorkflowId
+        ? "PAD-Flow-Run aufgerufen. Ausführung in Power Automate verfolgen."
+        : "PAD-Konsole aufgerufen. Flow-Ausführung in der PAD-Konsole verfolgen.",
       "external"
     );
     finishRun(runId, "success");

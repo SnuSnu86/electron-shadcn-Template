@@ -1,3 +1,4 @@
+import { buildPadRunUrl } from "@/main/execution/pad-url";
 import type { FlowDiagram, ProcessAction } from "@/shared/domain";
 import type { ProcessInput } from "../repository";
 
@@ -9,6 +10,8 @@ const EXCEL_MAIN =
   "G:\\UIL-CL-Zentral\\04 Statistiken & Auswertungen\\01 Statistiken\\Servicegrad LO\\Geschaeftsjahr 2526\\Servicegrad LSS Bot\\Servicegradermittlung.xlsm";
 const KENNZAHLEN_FILE =
   "\\\\adsgroup\\Group\\UIL-CL-Zentral\\04 Statistiken & Auswertungen\\01 Statistiken\\Servicegrad LO\\Geschaeftsjahr 2526\\Servicegrad LSS Bot\\Servicegrad Kennzahlen.xlsx";
+const SERVICEGRAD_PAD_ENVIRONMENT_ID = "f5eaa9d6-cb8e-e5b2-b60a-4aa38e133e46";
+const SERVICEGRAD_PAD_WORKFLOW_ID = "0fdc73b7-78b9-4b4e-887a-ca73268683a8";
 
 function linearDiagram(
   items: {
@@ -27,7 +30,13 @@ function linearDiagram(
 export const servicegradAction = {
   type: "pad",
   padFlowName: "Servicegrad",
-  padUrl: "ms-powerautomate:",
+  padEnvironmentId: SERVICEGRAD_PAD_ENVIRONMENT_ID,
+  padWorkflowId: SERVICEGRAD_PAD_WORKFLOW_ID,
+  padUrl:
+    buildPadRunUrl({
+      padEnvironmentId: SERVICEGRAD_PAD_ENVIRONMENT_ID,
+      padWorkflowId: SERVICEGRAD_PAD_WORKFLOW_ID,
+    }) ?? "ms-powerautomate:",
 } satisfies ProcessAction;
 
 export const servicegradInput: ProcessInput = {
@@ -35,7 +44,7 @@ export const servicegradInput: ProcessInput = {
   descriptionShort:
     "Tägliche Servicegrad-Ermittlung für LC1, LC3, LC6, LC8 und LC9 aus SAP-Lieferdaten mit Excel-Auswertung und E-Mail-Versand.",
   descriptionLong:
-    "Light-Version des Servicegrad-Ermittlungsprozesses: Power Automate Cloud Scheduler (Mo–Fr 01:00) startet einen Power-Automate-Desktop-Flow, der SAP-Daten per GUI Scripting exportiert, in Servicegradermittlung.xlsm berechnet, Kennzahlen in eine Reporting-Datei überträgt und das Ergebnis per Outlook an den Verteiler sendet. Standorte: WM Stuttgart LC1, WM Ludwigsburg LC6, WM Hannover LC3, WM Polen LC9, WM Illingen LC8. Vollständige technische Beschreibung: docs/Servicegrad/Servicegrad.md",
+    "Servicegrad-Ermittlungsprozesses: Power Automate Cloud Scheduler (Mo–Fr 01:00) startet einen Power-Automate-Desktop-Flow, der SAP-Daten per GUI Scripting exportiert, in Servicegradermittlung.xlsm berechnet, Kennzahlen in eine Reporting-Datei überträgt und das Ergebnis per Outlook an den Verteiler sendet. Standorte: WM Stuttgart LC1, WM Ludwigsburg LC6, WM Hannover LC3, WM Polen LC9, WM Illingen LC8. Vollständige technische Beschreibung: docs/Servicegrad/Servicegrad.md",
   businessOwner: "LSS / Servicegrad LO",
   technicalOwner: "RPA-Team",
   category: "SAP",
@@ -90,17 +99,20 @@ export const servicegradInput: ProcessInput = {
       },
       {
         path: EXCEL_MAIN,
-        purpose: "Haupt-Auswertungsdatei mit Makros DatenkopierenSAP, SGrechner, DatenUebertragung, Email",
+        purpose:
+          "Haupt-Auswertungsdatei mit Makros DatenkopierenSAP, SGrechner, DatenUebertragung, Email",
       },
       {
         path: KENNZAHLEN_FILE,
-        purpose: "Historische Kennzahlendatei für abteilungsübergreifendes Reporting",
+        purpose:
+          "Historische Kennzahlendatei für abteilungsübergreifendes Reporting",
       },
     ],
     systems: [
       {
         name: "SAP S/4 HANA PS4",
-        detail: "Mandant 009, Benutzer 5100LSS1 (SSO), Transaktion /LSGIT/VS_DLV_CHECK, Layout „Servicegrad Manuell“",
+        detail:
+          "Mandant 009, Benutzer 5100LSS1 (SSO), Transaktion /LSGIT/VS_DLV_CHECK, Layout „Servicegrad Manuell“",
       },
       {
         name: "Microsoft Excel",
@@ -108,11 +120,12 @@ export const servicegradInput: ProcessInput = {
       },
       {
         name: "Microsoft Outlook",
-        detail: "HTML-Mail, Betreff „Servicegrad“, Verteiler im Email-Makro der xlsm",
+        detail:
+          "HTML-Mail, Betreff „Servicegrad“, Verteiler im Email-Makro der xlsm",
       },
     ],
     notes:
-      "Light-Version ohne Feiertagslogik. Pfad C:\\Users\\5100LSS1\\Documents\\SG\\ ist an den SAP-Service-User gebunden. Produktivstart erfolgt über den Cloud-Scheduler — manueller Start in JOZI öffnet die PAD-Konsole.",
+      "Version ohne Feiertagslogik. Pfad C:\\Users\\5100LSS1\\Documents\\SG\\ ist an den SAP-User gebunden. Manueller Start in JOZI ruft den konkreten PAD-Flow per Environment-ID und Workflow-ID auf.",
   },
   runbook: {
     whenToUse:
@@ -127,7 +140,7 @@ export const servicegradInput: ProcessInput = {
     ],
     steps: [
       "Prüfen, ob der Cloud-Lauf um 01:00 bereits erfolgreich war (E-Mail „Servicegrad“ im Posteingang)",
-      "Bei manuellem Start: PAD-Konsole öffnen und Flow „Servicegrad (Light-Version)“ starten",
+      "Bei manuellem Start: In JOZI „Prozess starten“ wählen; Power Automate wird mit dem Flow „Servicegrad“ aufgerufen",
       "Flow läuft durch: Get DateTime → SAP-Export → Excel-Makros → E-Mail",
       "E-Mail prüfen: Tabelle (Tabelle2 B12:Q19) und Diagramm (B22:Q45), Betreff „Servicegrad“",
       "Optional: Kennzahlen-Datei auf dem Netzlaufwerk auf aktuelle Werte prüfen",
@@ -141,7 +154,8 @@ export const servicegradInput: ProcessInput = {
     ],
     errors: [
       {
-        problem: "Keine E-Mail / leerer Report am Feiertag nach langem Wochenende",
+        problem:
+          "Keine E-Mail / leerer Report am Feiertag nach langem Wochenende",
         solution:
           "Keine Feiertagslogik im Flow — am Dienstag nach Feiertag wird der Feiertag als Vortag verwendet, für den keine SAP-Daten existieren. Manuell mit korrektem Datum nachfahren oder warten bis nächster Werktag.",
       },
@@ -282,7 +296,7 @@ export const servicegradTutorial = {
       group: "Manuell",
       title: "Manuellen Lauf starten",
       description:
-        "In JOZI „Prozess starten“ wählen — PAD-Konsole öffnet sich. Dort den Flow „Servicegrad (Light-Version)“ ausführen. Parameter nur dokumentieren; Datumslogik liegt im Subflow Get DateTime.",
+        "In JOZI „Prozess starten“ wählen — Power Automate wird mit dem Flow „Servicegrad“ aufgerufen. Parameter nur dokumentieren; Datumslogik liegt im Subflow Get DateTime.",
       expectedResult:
         "PAD-Flow läuft durch alle Subflows (siehe Live-Log in PAD, nicht in JOZI).",
     },
@@ -291,7 +305,8 @@ export const servicegradTutorial = {
       title: "Kennzahlen-Datei prüfen",
       description:
         "Öffne Servicegrad Kennzahlen.xlsx auf dem Netzlaufwerk und prüfe, ob die aktuellen Werte für das Auswertungsdatum eingetragen wurden.",
-      expectedResult: "Neue Spalte/Zeile für das Auswertungsdatum ist vorhanden.",
+      expectedResult:
+        "Neue Spalte/Zeile für das Auswertungsdatum ist vorhanden.",
     },
     {
       group: "Fehler",

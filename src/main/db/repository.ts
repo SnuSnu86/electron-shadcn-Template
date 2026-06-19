@@ -19,7 +19,6 @@ import type {
   TechInfo,
   Tutorial,
   TutorialStep,
-  UserRole,
 } from "@/shared/domain";
 import { getDb } from "./database";
 
@@ -657,14 +656,6 @@ export function setSetting(key: string, value: string): void {
       "INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value"
     )
     .run(key, value);
-}
-
-export function getCurrentRole(): UserRole {
-  const value = getSetting("role");
-  if (value === "viewer" || value === "operator" || value === "editor") {
-    return value;
-  }
-  return "editor";
 }
 
 // ---------- Dashboard ----------

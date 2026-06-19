@@ -132,12 +132,10 @@ function StepEditorDialog({
 
 export function TutorialTab({
   process,
-  canEdit,
   wizardOpen,
   onWizardOpenChange,
 }: {
   process: ProcessDetail;
-  canEdit: boolean;
   wizardOpen: boolean;
   onWizardOpenChange: (open: boolean) => void;
 }) {
@@ -194,12 +192,10 @@ export function TutorialTab({
               Schritt durch diesen Prozess — inklusive Checkliste und
               Trainings-Nachweis.
             </p>
-            {canEdit && (
-              <Button className="mt-2" onClick={() => setMetaOpen(true)}>
-                <PlusIcon data-icon="inline-start" />
-                Tutorial anlegen
-              </Button>
-            )}
+            <Button className="mt-2" onClick={() => setMetaOpen(true)}>
+              <PlusIcon data-icon="inline-start" />
+              Tutorial anlegen
+            </Button>
           </CardContent>
         </Card>
 
@@ -258,19 +254,17 @@ export function TutorialTab({
             </p>
           </div>
           <div className="flex shrink-0 gap-2">
-            {canEdit && (
-              <Button
-                onClick={() => {
-                  setStepDraft(null);
-                  setStepEditorOpen(true);
-                }}
-                size="sm"
-                variant="outline"
-              >
-                <PlusIcon data-icon="inline-start" />
-                Schritt
-              </Button>
-            )}
+            <Button
+              onClick={() => {
+                setStepDraft(null);
+                setStepEditorOpen(true);
+              }}
+              size="sm"
+              variant="outline"
+            >
+              <PlusIcon data-icon="inline-start" />
+              Schritt
+            </Button>
             <Button
               disabled={tutorial.steps.length === 0}
               onClick={() => onWizardOpenChange(true)}
@@ -317,25 +311,23 @@ export function TutorialTab({
                         </p>
                       )}
                     </div>
-                    {canEdit && (
-                      <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                        <Button
-                          onClick={() => editStep(step)}
-                          size="icon-sm"
-                          variant="ghost"
-                        >
-                          <PencilIcon />
-                        </Button>
-                        <Button
-                          className="text-destructive"
-                          onClick={() => removeStep(step)}
-                          size="icon-sm"
-                          variant="ghost"
-                        >
-                          <Trash2Icon />
-                        </Button>
-                      </div>
-                    )}
+                    <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                      <Button
+                        onClick={() => editStep(step)}
+                        size="icon-sm"
+                        variant="ghost"
+                      >
+                        <PencilIcon />
+                      </Button>
+                      <Button
+                        className="text-destructive"
+                        onClick={() => removeStep(step)}
+                        size="icon-sm"
+                        variant="ghost"
+                      >
+                        <Trash2Icon />
+                      </Button>
+                    </div>
                   </div>
                 </li>
               );

@@ -92,7 +92,7 @@ function DashboardPage() {
           })}
         </p>
         <h1 className="mt-1 font-display font-semibold text-3xl tracking-tight">
-          Leitstand
+          Dashboard
         </h1>
         <p className="mt-1 text-muted-foreground text-sm">
           Alle Automationen auf einen Blick — Status, Läufe und kritische

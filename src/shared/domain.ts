@@ -16,7 +16,6 @@ export type RunStatus =
 export type LogLevel = "info" | "warn" | "error";
 export type LogSource = "app" | "script" | "external";
 export type ParamType = "string" | "number" | "date" | "boolean" | "enum";
-export type UserRole = "viewer" | "operator" | "editor";
 
 export interface BusinessInfo {
   benefit: string;
@@ -98,8 +97,10 @@ export interface ProcessAction {
   headers?: Record<string, string>;
   method?: "POST" | "GET";
   /** pad: Flow-Name bzw. ms-powerautomate-URL */
+  padEnvironmentId?: string;
   padFlowName?: string;
   padUrl?: string;
+  padWorkflowId?: string;
   type: ActionType;
   /** cloudflow: HTTP-Trigger */
   url?: string;
@@ -255,12 +256,6 @@ export const ACTION_TYPE_LABELS: Record<ActionType, string> = {
   pad: "Power Automate Desktop",
   cloudflow: "Cloud-Flow (HTTP)",
   file: "Datei öffnen",
-};
-
-export const ROLE_LABELS: Record<UserRole, string> = {
-  viewer: "Viewer",
-  operator: "Operator",
-  editor: "Editor",
 };
 
 export const PARAM_TYPE_LABELS: Record<ParamType, string> = {

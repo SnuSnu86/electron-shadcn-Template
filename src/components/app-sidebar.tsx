@@ -6,12 +6,11 @@ import {
   SettingsIcon,
   StarIcon,
 } from "lucide-react";
-import { useDashboard, useRole } from "@/lib/queries";
-import { ROLE_LABELS } from "@/shared/domain";
+import { useDashboard } from "@/lib/queries";
 import { cn } from "@/utils/tailwind";
 
 const NAV_ITEMS = [
-  { to: "/", label: "Leitstand", icon: GaugeIcon, exact: true },
+  { to: "/", label: "Dashboard", icon: GaugeIcon, exact: true },
   { to: "/prozesse", label: "Prozesskatalog", icon: LayersIcon, exact: false },
   {
     to: "/einstellungen",
@@ -23,7 +22,6 @@ const NAV_ITEMS = [
 
 export default function AppSidebar() {
   const { data: stats } = useDashboard();
-  const { data: role } = useRole();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   return (
@@ -99,20 +97,6 @@ export default function AppSidebar() {
           </div>
         </>
       )}
-
-      <div className="mt-auto border-border/60 border-t p-3">
-        <div className="flex items-center gap-2.5 rounded-md bg-muted/50 px-2.5 py-2">
-          <span className="flex size-7 items-center justify-center rounded-full bg-primary/15 font-display font-semibold text-primary text-xs">
-            {(role ?? "?").charAt(0).toUpperCase()}
-          </span>
-          <div className="min-w-0">
-            <p className="truncate font-medium text-xs">Lokales Profil</p>
-            <p className="text-[0.6875rem] text-muted-foreground">
-              Rolle: {role ? ROLE_LABELS[role] : "…"}
-            </p>
-          </div>
-        </div>
-      </div>
     </aside>
   );
 }

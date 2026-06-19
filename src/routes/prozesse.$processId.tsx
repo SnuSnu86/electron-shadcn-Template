@@ -50,7 +50,6 @@ import { ipc } from "@/ipc/manager";
 import {
   useInvalidateProcessData,
   useProcess,
-  useRole,
   useTutorial,
 } from "@/lib/queries";
 import { FREQUENCY_LABELS } from "@/shared/domain";
@@ -76,7 +75,6 @@ function ProcessDetailPage() {
   const id = Number(processId);
 
   const { data: process, isLoading } = useProcess(id);
-  const { data: role } = useRole();
   const { data: tutorial } = useTutorial(id);
   const invalidate = useInvalidateProcessData();
 
@@ -84,9 +82,6 @@ function ProcessDetailPage() {
   const [editorOpen, setEditorOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [wizardOpen, setWizardOpen] = useState(false);
-
-  const canRun = role === "operator" || role === "editor";
-  const canEdit = role === "editor";
 
   if (isLoading) {
     return (
@@ -220,22 +215,20 @@ function ProcessDetailPage() {
                 Tutorial
               </Button>
             )}
-            {canRun && (
-              <Button
-                className="glow-primary"
-                disabled={process.status === "deprecated"}
-                onClick={() => setStartOpen(true)}
-                size="lg"
-                title={
-                  process.status === "maintenance"
-                    ? "Achtung: Prozess ist in Wartung!"
-                    : undefined
-                }
-              >
-                <PlayIcon data-icon="inline-start" />
-                Prozess starten
-              </Button>
-            )}
+            <Button
+              className="glow-primary"
+              disabled={process.status === "deprecated"}
+              onClick={() => setStartOpen(true)}
+              size="lg"
+              title={
+                process.status === "maintenance"
+                  ? "Achtung: Prozess ist in Wartung!"
+                  : undefined
+              }
+            >
+              <PlayIcon data-icon="inline-start" />
+              Prozess starten
+            </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button size="icon-lg" variant="outline">
@@ -243,25 +236,21 @@ function ProcessDetailPage() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                {canEdit && (
-                  <DropdownMenuItem onClick={() => setEditorOpen(true)}>
-                    <PencilIcon />
-                    Prozess bearbeiten
-                  </DropdownMenuItem>
-                )}
+                <DropdownMenuItem onClick={() => setEditorOpen(true)}>
+                  <PencilIcon />
+                  Prozess bearbeiten
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={exportMarkdown}>
                   <FileDownIcon />
                   Runbook als Markdown
                 </DropdownMenuItem>
-                {canEdit && (
-                  <DropdownMenuItem
-                    onClick={() => setDeleteOpen(true)}
-                    variant="destructive"
-                  >
-                    <Trash2Icon />
-                    Prozess löschen
-                  </DropdownMenuItem>
-                )}
+                <DropdownMenuItem
+                  onClick={() => setDeleteOpen(true)}
+                  variant="destructive"
+                >
+                  <Trash2Icon />
+                  Prozess löschen
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -309,7 +298,7 @@ function ProcessDetailPage() {
           <TechnicalDetailsTab process={process} />
         </TabsContent>
         <TabsContent value="konfiguration">
-          <ConfigTab canEdit={canEdit} process={process} />
+          <ConfigTab process={process} />
         </TabsContent>
         <TabsContent value="runs">
           <RunsTab
@@ -325,7 +314,6 @@ function ProcessDetailPage() {
         </TabsContent>
         <TabsContent value="tutorial">
           <TutorialTab
-            canEdit={canEdit}
             onWizardOpenChange={setWizardOpen}
             process={process}
             wizardOpen={wizardOpen}

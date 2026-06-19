@@ -10,6 +10,9 @@ let testUserData = "";
 vi.mock("electron", () => ({
   app: {
     getPath: (name: string) => {
+      if (name === "exe") {
+        return path.join("C:", "Program Files", "JOZI", "JOZI-Docs.exe");
+      }
       if (name !== "userData") {
         throw new Error(`Unexpected app path: ${name}`);
       }

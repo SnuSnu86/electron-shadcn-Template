@@ -107,7 +107,16 @@ CREATE INDEX IF NOT EXISTS idx_artifacts_process ON process_technical_artifacts(
 
 export function getDbPath(): string {
   const portableDataDir = process.env.JOZI_PORTABLE_DATA_DIR;
-  return path.join(portableDataDir || app.getPath("userData"), "jozi-control-center.db");
+  if (portableDataDir) {
+    return path.join(portableDataDir, "jozi-control-center.db");
+  }
+
+  const exeDir = path.dirname(app.getPath("exe"));
+  if (path.basename(exeDir).toLowerCase() === "app") {
+    return path.join(path.dirname(exeDir), "data", "jozi-control-center.db");
+  }
+
+  return path.join(app.getPath("userData"), "jozi-control-center.db");
 }
 
 export function getDb(): DatabaseSync {

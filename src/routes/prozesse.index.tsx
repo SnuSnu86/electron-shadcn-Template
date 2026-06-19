@@ -39,7 +39,6 @@ import {
   queryKeys,
   useCategories,
   useProcesses,
-  useRole,
   useTags,
 } from "@/lib/queries";
 import {
@@ -73,7 +72,6 @@ function CatalogPage() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
   const queryClient = useQueryClient();
-  const { data: role } = useRole();
 
   const [searchText, setSearchText] = useState(search.q ?? "");
   const [editorOpen, setEditorOpen] = useState(false);
@@ -167,12 +165,10 @@ function CatalogPage() {
             starten.
           </p>
         </div>
-        {role === "editor" && (
-          <Button onClick={() => setEditorOpen(true)} size="lg">
-            <PlusIcon data-icon="inline-start" />
-            Neuer Prozess
-          </Button>
-        )}
+        <Button onClick={() => setEditorOpen(true)} size="lg">
+          <PlusIcon data-icon="inline-start" />
+          Neuer Prozess
+        </Button>
       </div>
 
       <div

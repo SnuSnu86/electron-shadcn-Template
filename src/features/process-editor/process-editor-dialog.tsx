@@ -68,8 +68,10 @@ interface EditorForm {
   method: "POST" | "GET";
   name: string;
   notes: string;
+  padEnvironmentId: string;
   padFlowName: string;
   padUrl: string;
+  padWorkflowId: string;
   prerequisites: string;
   sollProcess: string;
   status: ProcessStatus;
@@ -114,8 +116,10 @@ const EMPTY_FORM: EditorForm = {
   method: "POST",
   bodyTemplate: "",
   filePath: "",
+  padEnvironmentId: "",
   padFlowName: "",
   padUrl: "",
+  padWorkflowId: "",
 };
 
 const DIAGRAM_KINDS: DiagramNodeKind[] = [
@@ -172,8 +176,10 @@ function detailToForm(detail: ProcessDetail): EditorForm {
     method: detail.action.method ?? "POST",
     bodyTemplate: detail.action.bodyTemplate ?? "",
     filePath: detail.action.filePath ?? "",
+    padEnvironmentId: detail.action.padEnvironmentId ?? "",
     padFlowName: detail.action.padFlowName ?? "",
     padUrl: detail.action.padUrl ?? "",
+    padWorkflowId: detail.action.padWorkflowId ?? "",
   };
 }
 
@@ -259,8 +265,10 @@ function formToInput(form: EditorForm): ProcessInput {
       method: form.method,
       bodyTemplate: form.bodyTemplate || undefined,
       filePath: form.filePath || undefined,
+      padEnvironmentId: form.padEnvironmentId || undefined,
       padFlowName: form.padFlowName || undefined,
       padUrl: form.padUrl || undefined,
+      padWorkflowId: form.padWorkflowId || undefined,
     },
   };
 }
@@ -699,9 +707,25 @@ export default function ProcessEditorDialog({
                     value={form.padFlowName}
                   />
                 </Field>
+                <Field label="Flow-ID / Workflow-ID">
+                  <Input
+                    className="font-mono text-xs"
+                    onChange={(e) => set("padWorkflowId", e.target.value)}
+                    placeholder="0fdc73b7-78b9-4b4e-887a-ca73268683a8"
+                    value={form.padWorkflowId}
+                  />
+                </Field>
+                <Field label="Environment-ID">
+                  <Input
+                    className="font-mono text-xs"
+                    onChange={(e) => set("padEnvironmentId", e.target.value)}
+                    placeholder="f5eaa9d6-cb8e-e5b2-b60a-4aa38e133e46"
+                    value={form.padEnvironmentId}
+                  />
+                </Field>
                 <Field
-                  hint="Standard: ms-powerautomate:"
-                  label="PAD-URL (optional)"
+                  hint="Optionaler Fallback. Wenn Environment-ID und Workflow-ID gepflegt sind, baut die App die Run-URL automatisch."
+                  label="PAD-URL"
                 >
                   <Input
                     className="font-mono text-xs"

@@ -93,8 +93,10 @@ export const actionSchema = z.object({
   headers: z.record(z.string(), z.string()).optional(),
   bodyTemplate: z.string().optional(),
   filePath: z.string().optional(),
+  padEnvironmentId: z.string().optional(),
   padFlowName: z.string().optional(),
   padUrl: z.string().optional(),
+  padWorkflowId: z.string().optional(),
 });
 
 export const processInputSchema = z.object({

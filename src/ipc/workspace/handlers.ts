@@ -1,10 +1,6 @@
 import { os } from "@orpc/server";
 import { z } from "zod";
-import {
-  getDashboardStats as dbGetDashboardStats,
-  getCurrentRole,
-  setSetting,
-} from "@/main/db/repository";
+import { getDashboardStats as dbGetDashboardStats } from "@/main/db/repository";
 import {
   backupDatabase,
   exportAllJson,
@@ -13,15 +9,6 @@ import {
 import { ipcContext } from "../context";
 
 export const getDashboardStats = os.handler(() => dbGetDashboardStats());
-
-export const getRole = os.handler(() => getCurrentRole());
-
-export const setRole = os
-  .input(z.object({ role: z.enum(["viewer", "operator", "editor"]) }))
-  .handler(({ input }) => {
-    setSetting("role", input.role);
-    return input.role;
-  });
 
 export const exportJson = os
   .use(ipcContext.mainWindowContext)

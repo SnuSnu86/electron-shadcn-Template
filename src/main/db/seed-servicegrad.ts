@@ -1,6 +1,7 @@
 import { getDb } from "./database";
 import {
   SERVICEGRAD_PROCESS_NAME,
+  servicegradAction,
   servicegradInput,
   servicegradParameters,
   servicegradTutorial,
@@ -15,6 +16,23 @@ import {
   upsertStep,
   upsertTutorial,
 } from "./repository";
+
+function backfillServicegradAction(processId: number): void {
+  const db = getDb();
+  const row = db
+    .prepare("SELECT action_json FROM processes WHERE id = ?")
+    .get(processId) as { action_json: string } | undefined;
+  const current = row ? (JSON.parse(row.action_json) as object) : {};
+  const next = { ...current, ...servicegradAction };
+
+  if (JSON.stringify(current) === JSON.stringify(next)) {
+    return;
+  }
+
+  db.prepare(
+    "UPDATE processes SET action_json = ?, updated_at = datetime('now') WHERE id = ?"
+  ).run(JSON.stringify(next), processId);
+}
 
 /** Entfernt alle Prozesse außer dem echten Servicegrad-Eintrag. */
 export function purgeMockProcesses(): void {
@@ -36,6 +54,8 @@ export function seedServicegradIfMissing(): void {
     .get(SERVICEGRAD_PROCESS_NAME) as { id: number } | undefined;
 
   const processId = existing?.id ?? createProcess(servicegradInput);
+
+  backfillServicegradAction(processId);
 
   if (listTechnicalArtifacts(processId).length === 0) {
     replaceTechnicalArtifacts(processId, servicegradTechnicalArtifacts);
