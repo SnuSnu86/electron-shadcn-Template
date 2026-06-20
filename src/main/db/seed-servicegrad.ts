@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { getDb } from "./database";
 import {
   SERVICEGRAD_PROCESS_NAME,
@@ -11,13 +12,47 @@ import {
   createProcess,
   deleteProcess,
   deleteTutorial,
+  getSetting,
   getTutorialByProcess,
   listTechnicalArtifacts,
   replaceTechnicalArtifacts,
+  setSetting,
   upsertParameter,
   upsertStep,
   upsertTutorial,
 } from "./repository";
+
+const SERVICEGRAD_TUTORIAL_FINGERPRINT_KEY =
+  "servicegrad.tutorial.seed-fingerprint";
+const LEGACY_SERVICEGRAD_TUTORIAL_FINGERPRINTS = new Set([
+  "6208431202d4b27cf35735ce8fc010a86c403793acbce38ddaf265efc321250e",
+]);
+
+interface TutorialContent {
+  description: string;
+  steps: readonly {
+    group: string;
+    title: string;
+    description: string;
+    expectedResult: string;
+  }[];
+  title: string;
+}
+
+function tutorialFingerprint(tutorial: TutorialContent): string {
+  const content = {
+    title: tutorial.title,
+    description: tutorial.description,
+    steps: tutorial.steps.map((step) => ({
+      group: step.group,
+      title: step.title,
+      description: step.description,
+      expectedResult: step.expectedResult,
+    })),
+  };
+
+  return createHash("sha256").update(JSON.stringify(content)).digest("hex");
+}
 
 function backfillServicegradAction(processId: number): void {
   const db = getDb();
@@ -77,17 +112,21 @@ export function seedServicegradIfMissing(): void {
 
 function syncServicegradTutorial(processId: number): void {
   const existingTutorial = getTutorialByProcess(processId);
-  const isOldSeedTutorial =
-    existingTutorial?.title === "Servicegrad-Lauf verstehen und prüfen" ||
-    (existingTutorial?.title === servicegradTutorial.title &&
-      existingTutorial.steps.length !== servicegradTutorial.steps.length);
+  const currentFingerprint = tutorialFingerprint(servicegradTutorial);
 
-  if (existingTutorial && isOldSeedTutorial) {
+  if (existingTutorial) {
+    const existingFingerprint = tutorialFingerprint(existingTutorial);
+    const seededFingerprint = getSetting(SERVICEGRAD_TUTORIAL_FINGERPRINT_KEY);
+    const isUnchangedSeed = seededFingerprint === existingFingerprint;
+    const isKnownLegacySeed =
+      seededFingerprint === null &&
+      LEGACY_SERVICEGRAD_TUTORIAL_FINGERPRINTS.has(existingFingerprint);
+
+    if (!(isUnchangedSeed || isKnownLegacySeed)) {
+      return;
+    }
+
     deleteTutorial(existingTutorial.id);
-  }
-
-  if (existingTutorial && !isOldSeedTutorial) {
-    return;
   }
 
   const tutorialId = upsertTutorial(
@@ -107,6 +146,8 @@ function syncServicegradTutorial(processId: number): void {
       mediaUrl: null,
     });
   });
+
+  setSetting(SERVICEGRAD_TUTORIAL_FINGERPRINT_KEY, currentFingerprint);
 }
 
 /** Mock-Prozesse entfernen und echten Katalog sicherstellen. */

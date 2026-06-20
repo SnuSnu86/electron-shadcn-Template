@@ -265,37 +265,45 @@ export const servicegradParameters = [
 export const servicegradTutorial = {
   title: "Servicegrad-Prozess selbst nachbauen",
   description:
-    "Geführter Aufbau von null bis zum eigenen Servicegrad-Prozess: Dateien und Makros erstellen, SAP GUI Scripting aufnehmen, Power Automate Desktop und Cloud einrichten, testen und dokumentieren.",
+    "Geführter Aufbau des bestehenden Servicegrad-Prozesses auf einem eigenen Rechner: Dateien und Makros erstellen, SAP GUI Scripting aufnehmen, Power Automate Desktop und Cloud einrichten, testen und dokumentieren.",
   steps: [
     {
-      group: "Zielbild",
-      title: "Automatisierungsziel festlegen",
+      group: "Überblick",
+      title: "Servicegrad-Ablauf verstehen",
       description:
-        "Beschreibe deinen eigenen Zielprozess in einem Satz: Welche SAP-Daten werden geholt, welche Kennzahl entsteht in Excel und wer bekommt das Ergebnis? Nutze den Servicegrad-Prozess als Vorlage: SAP-Export, Excel-Berechnung, Kennzahlen-Datei und E-Mail.",
+        "Der feste Ablauf ist: SAP-Lieferdaten exportieren, den Servicegrad in Excel berechnen, Kennzahlen fortschreiben und das Ergebnis per E-Mail versenden. Die folgenden Schritte richten genau diesen Ablauf auf deinem Rechner ein.",
       expectedResult:
-        "Der Prozesszweck ist klar dokumentiert und du weißt, welche Eingabe, Verarbeitung und Ausgabe dein eigener Prozess haben soll.",
+        "Du kennst Eingabe, Verarbeitung und Ergebnis des Servicegrad-Prozesses.",
     },
     {
       group: "Vorbereitung",
       title: "Systemzugänge und Berechtigungen prüfen",
       description:
-        "Melde dich auf dem RPA-Rechner mit dem späteren Ausführungskonto an. Prüfe SAP PS4, Mandant 009, SAP GUI Scripting, Excel-Makros, Power Automate Desktop, Power Automate Cloud, Outlook und die benötigten Netzlaufwerke.",
+        "Prüfe auf deinem Rechner SAP GUI mit Zugriff auf PS4/Mandant 009, aktivierbares SAP GUI Scripting, Excel mit Makro-Unterstützung, Power Automate Desktop, Power Automate Cloud und Outlook. Stelle außerdem sicher, dass du auf die benötigten SAP-Daten und Zielordner zugreifen kannst.",
       expectedResult:
-        "Alle Systeme lassen sich mit dem Ausführungskonto öffnen und die benötigten Berechtigungen sind vorhanden.",
+        "Alle benötigten Programme, Zugänge und Konfigurationen stehen für den Nachbau bereit.",
     },
     {
       group: "Vorbereitung",
       title: "Arbeitsordner und Dateinamen anlegen",
       description:
-        "Lege einen lokalen Exportordner an, z.B. C:\\Users\\5100LSS1\\Documents\\SG\\. Definiere ein eindeutiges Dateinamensschema wie SG-<Datum>.xlsx und notiere die Zielpfade fuer Hauptmappe und Kennzahlen-Datei.",
+        "Lege auf deinem Rechner einen eigenen Arbeitsordner und einen Exportordner an. Definiere das Dateinamensschema SG-<Datum>.xlsx sowie die Speicherorte für Hauptmappe, Kennzahlen-Datei und VBScript. Du bestimmst diese Pfade selbst.",
       expectedResult:
-        "Exportordner, Hauptdatei, Kennzahlen-Datei und Dateinamensschema sind festgelegt und erreichbar.",
+        "Arbeitsordner, Exportordner, Hauptdatei, Kennzahlen-Datei, VBScript und Dateinamensschema sind festgelegt und erreichbar.",
+    },
+    {
+      group: "Vorbereitung",
+      title: "Pfade in allen Bestandteilen hinterlegen",
+      description:
+        "Übertrage die von dir gewählten Speicherorte einheitlich in den PAD-Flow, das VBScript und die VBA-Makros. Prüfe insbesondere Exportpfad, Dateiname, Hauptmappe und Kennzahlen-Datei.",
+      expectedResult:
+        "PAD-Flow, VBScript und VBA-Makros verwenden dieselben, auf deinem Rechner gültigen Pfade.",
     },
     {
       group: "Excel-Makros",
       title: "Hauptmappe als XLSM erstellen",
       description:
-        "Erstelle die Excel-Hauptdatei Servicegradermittlung.xlsm oder deine eigene Prozessdatei. Lege die benoetigten Tabellenblaetter fuer SAP-Rohdaten, Berechnung, Ergebnis-Tabelle und Diagramm an. Speichere die Datei als makrofaehige Arbeitsmappe.",
+        "Erstelle die Excel-Hauptdatei Servicegradermittlung.xlsm. Lege die benoetigten Tabellenblaetter fuer SAP-Rohdaten, Berechnung, Ergebnis-Tabelle und Diagramm an. Speichere die Datei als makrofaehige Arbeitsmappe.",
       expectedResult:
         "Die XLSM-Datei existiert, enthaelt die benoetigten Blaetter und kann Makros ausfuehren.",
     },
@@ -321,7 +329,7 @@ export const servicegradTutorial = {
       description:
         "Erstelle das zentrale Berechnungsmakro nach dem Muster SGrechner. Zaehle Erreicht/Nicht Erreicht je Standort oder Kategorie, berechne die Quote und schreibe Tabelle sowie Diagrammdaten in das Ergebnisblatt.",
       expectedResult:
-        "Die Servicegrad-Tabelle zeigt Werte fuer LC1, LC3, LC6, LC8, LC9 und ein Gesamtergebnis oder deine eigenen Zielbereiche.",
+        "Die Servicegrad-Tabelle zeigt Werte für LC1, LC3, LC6, LC8, LC9 und ein Gesamtergebnis.",
     },
     {
       group: "Excel-Makros",
@@ -425,23 +433,23 @@ export const servicegradTutorial = {
       description:
         "Teste typische Stoerungen: fehlendes Netzlaufwerk, gesperrte Excel-Datei, falsches SAP-Datum, fehlende Exportdatei und Outlook-Probleme. Notiere je Fehler die Meldung und den Workaround.",
       expectedResult:
-        "Der eigene Prozess hat nachvollziehbare Fehlermeldungen und bekannte Workarounds.",
+        "Der Servicegrad-Prozess hat nachvollziehbare Fehlermeldungen und bekannte Workarounds.",
     },
     {
       group: "Dokumentation",
-      title: "Eigenen Prozess in JOZI dokumentieren",
+      title: "Servicegrad-Prozess in JOZI dokumentieren",
       description:
-        "Lege deinen eigenen Prozess in JOZI an. Erfasse Business-Zweck, Systeme, Dateien, PAD-Flow, Cloud-Scheduler, SAP VBScript, Makros, Parameter, Runbook und Fehlerbehandlung.",
+        "Erfasse für den Servicegrad-Prozess Business-Zweck, Systeme, Dateien, PAD-Flow, Cloud-Scheduler, SAP VBScript, Makros, Parameter, Runbook und Fehlerbehandlung in JOZI.",
       expectedResult:
-        "Der User hat in JOZI einen eigenen vollstaendig dokumentierten Prozess erstellt.",
+        "Der Servicegrad-Prozess ist in JOZI vollständig dokumentiert.",
     },
     {
       group: "Dokumentation",
-      title: "Eigenes Tutorial fuer Uebergabe erstellen",
+      title: "Übergabe dokumentieren",
       description:
-        "Erstelle fuer deinen Prozess ein eigenes Tutorial nach diesem Aufbau. Fuehre eine zweite Person Schritt fuer Schritt durch den Ablauf und passe unklare Stellen direkt an.",
+        "Ergänze lokale Besonderheiten wie deine gewählten Pfade, Zugänge und Ansprechpersonen. Führe eine zweite Person Schritt für Schritt durch den Servicegrad-Ablauf und passe unklare Stellen direkt an.",
       expectedResult:
-        "Eine neue Person kann den Prozess anhand deines Tutorials von Anfang bis Ende nachbauen und betreiben.",
+        "Eine neue Person kann den Servicegrad-Prozess anhand der Dokumentation nachbauen und betreiben.",
     },
   ],
 };
