@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-export const criticalitySchema = z.enum(["low", "medium", "high"]);
 export const frequencySchema = z.enum([
   "adhoc",
   "daily",
@@ -25,7 +24,6 @@ export const paramTypeSchema = z.enum([
 export const processFilterSchema = z.object({
   search: z.string().optional(),
   category: z.string().optional(),
-  criticality: criticalitySchema.optional(),
   status: processStatusSchema.optional(),
   tag: z.string().optional(),
   favoritesOnly: z.boolean().optional(),
@@ -106,7 +104,6 @@ export const processInputSchema = z.object({
   businessOwner: z.string(),
   technicalOwner: z.string(),
   category: z.string().min(1),
-  criticality: criticalitySchema,
   frequency: frequencySchema,
   status: processStatusSchema,
   systems: z.array(z.string()),

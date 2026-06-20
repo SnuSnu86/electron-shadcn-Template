@@ -1,6 +1,5 @@
 import type {
   BusinessInfo,
-  Criticality,
   DashboardStats,
   FlowDiagram,
   Frequency,
@@ -59,7 +58,6 @@ function rowToSummary(row: Row): ProcessSummary {
     name: row.name,
     descriptionShort: row.description_short,
     category: row.category,
-    criticality: row.criticality as Criticality,
     frequency: row.frequency as Frequency,
     status: row.status as ProcessStatus,
     businessOwner: row.business_owner,
@@ -100,7 +98,6 @@ FROM processes p
 
 export interface ProcessFilter {
   category?: string;
-  criticality?: Criticality;
   favoritesOnly?: boolean;
   search?: string;
   status?: ProcessStatus;
@@ -128,9 +125,6 @@ export function listProcesses(filter: ProcessFilter = {}): ProcessSummary[] {
   if (filter.category) {
     result = result.filter((p) => p.category === filter.category);
   }
-  if (filter.criticality) {
-    result = result.filter((p) => p.criticality === filter.criticality);
-  }
   if (filter.status) {
     result = result.filter((p) => p.status === filter.status);
   }
@@ -156,7 +150,6 @@ export interface ProcessInput {
   business: BusinessInfo;
   businessOwner: string;
   category: string;
-  criticality: Criticality;
   descriptionLong: string;
   descriptionShort: string;
   diagram: FlowDiagram;
@@ -176,9 +169,9 @@ export function createProcess(input: ProcessInput): number {
     .prepare(
       `INSERT INTO processes
         (name, description_short, description_long, business_owner, technical_owner,
-         category, criticality, frequency, status, systems_json, tags_json,
+         category, frequency, status, systems_json, tags_json,
          business_json, tech_json, runbook_json, diagram_json, action_json)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
     .run(
       input.name,
@@ -187,7 +180,6 @@ export function createProcess(input: ProcessInput): number {
       input.businessOwner,
       input.technicalOwner,
       input.category,
-      input.criticality,
       input.frequency,
       input.status,
       JSON.stringify(input.systems),
@@ -206,7 +198,7 @@ export function updateProcess(id: number, input: ProcessInput): void {
   db.prepare(
     `UPDATE processes SET
        name = ?, description_short = ?, description_long = ?, business_owner = ?,
-       technical_owner = ?, category = ?, criticality = ?, frequency = ?, status = ?,
+       technical_owner = ?, category = ?, frequency = ?, status = ?,
        systems_json = ?, tags_json = ?, business_json = ?, tech_json = ?,
        runbook_json = ?, diagram_json = ?, action_json = ?,
        updated_at = datetime('now')
@@ -218,7 +210,6 @@ export function updateProcess(id: number, input: ProcessInput): void {
     input.businessOwner,
     input.technicalOwner,
     input.category,
-    input.criticality,
     input.frequency,
     input.status,
     JSON.stringify(input.systems),
@@ -666,8 +657,7 @@ export function getDashboardStats(): DashboardStats {
     .prepare(
       `SELECT
         COUNT(*) AS total,
-        SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) AS active,
-        SUM(CASE WHEN criticality = 'high' THEN 1 ELSE 0 END) AS high
+        SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) AS active
        FROM processes`
     )
     .get() as Row;
@@ -695,7 +685,6 @@ export function getDashboardStats(): DashboardStats {
   return {
     totalProcesses: totals.total ?? 0,
     activeProcesses: totals.active ?? 0,
-    highCriticality: totals.high ?? 0,
     totalRuns: runTotals.total ?? 0,
     runsLast30Days: last30,
     failedLast30Days: runTotals.failed30 ?? 0,
@@ -706,7 +695,6 @@ export function getDashboardStats(): DashboardStats {
       count: c.count,
     })),
     recentRuns: listRecentRuns(8),
-    criticalProcesses: listProcesses({ criticality: "high" }).slice(0, 6),
     runningNow: runTotals.running ?? 0,
   };
 }

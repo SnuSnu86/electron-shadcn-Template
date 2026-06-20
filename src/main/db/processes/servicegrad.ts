@@ -48,7 +48,6 @@ export const servicegradInput: ProcessInput = {
   businessOwner: "LSS / Servicegrad LO",
   technicalOwner: "RPA-Team",
   category: "SAP",
-  criticality: "high",
   frequency: "daily",
   status: "active",
   systems: [
@@ -264,57 +263,185 @@ export const servicegradParameters = [
 ];
 
 export const servicegradTutorial = {
-  title: "Servicegrad-Lauf verstehen und prüfen",
+  title: "Servicegrad-Prozess selbst nachbauen",
   description:
-    "Kurzanleitung für den täglichen Servicegrad-Prozess: automatischer Scheduler, manueller Nachlauf und Ergebniskontrolle.",
+    "Geführter Aufbau von null bis zum eigenen Servicegrad-Prozess: Dateien und Makros erstellen, SAP GUI Scripting aufnehmen, Power Automate Desktop und Cloud einrichten, testen und dokumentieren.",
   steps: [
     {
-      group: "Hintergrund",
-      title: "Was macht dieser Prozess?",
+      group: "Zielbild",
+      title: "Automatisierungsziel festlegen",
       description:
-        "Der Bot ermittelt den Servicegrad (Erreicht vs. Nicht Erreicht) für die Lager LC1, LC3, LC6, LC8 und LC9 aus SAP-Lieferdaten, berechnet die Kennzahlen in Excel und versendet eine E-Mail mit Tabelle und Diagramm.",
+        "Beschreibe deinen eigenen Zielprozess in einem Satz: Welche SAP-Daten werden geholt, welche Kennzahl entsteht in Excel und wer bekommt das Ergebnis? Nutze den Servicegrad-Prozess als Vorlage: SAP-Export, Excel-Berechnung, Kennzahlen-Datei und E-Mail.",
       expectedResult:
-        "Du kennst den Zweck und weißt, dass der Produktivlauf Mo–Fr um 01:00 automatisch startet.",
+        "Der Prozesszweck ist klar dokumentiert und du weißt, welche Eingabe, Verarbeitung und Ausgabe dein eigener Prozess haben soll.",
     },
     {
       group: "Vorbereitung",
-      title: "Voraussetzungen prüfen",
+      title: "Systemzugänge und Berechtigungen prüfen",
       description:
-        "Stelle sicher, dass der RPA-Rechner SAP PS4, die Netzlaufwerke G: und adsgroup sowie Outlook erreichen kann. Der Ordner C:\\Users\\5100LSS1\\Documents\\SG\\ muss existieren.",
+        "Melde dich auf dem RPA-Rechner mit dem späteren Ausführungskonto an. Prüfe SAP PS4, Mandant 009, SAP GUI Scripting, Excel-Makros, Power Automate Desktop, Power Automate Cloud, Outlook und die benötigten Netzlaufwerke.",
       expectedResult:
-        "Alle Pfade aus dem Runbook sind vom RPA-Rechner aus erreichbar.",
+        "Alle Systeme lassen sich mit dem Ausführungskonto öffnen und die benötigten Berechtigungen sind vorhanden.",
     },
     {
-      group: "Automatik",
-      title: "Nachtlauf kontrollieren",
+      group: "Vorbereitung",
+      title: "Arbeitsordner und Dateinamen anlegen",
       description:
-        "Nach 01:00 Uhr (werktags): Prüfe ob die E-Mail mit Betreff „Servicegrad“ im Verteiler eingegangen ist. Enthält Servicegrad-Tabelle und Diagramm.",
+        "Lege einen lokalen Exportordner an, z.B. C:\\Users\\5100LSS1\\Documents\\SG\\. Definiere ein eindeutiges Dateinamensschema wie SG-<Datum>.xlsx und notiere die Zielpfade fuer Hauptmappe und Kennzahlen-Datei.",
       expectedResult:
-        "E-Mail ist da, Werte für alle fünf Standorte plus Gesamtergebnis sind plausibel.",
+        "Exportordner, Hauptdatei, Kennzahlen-Datei und Dateinamensschema sind festgelegt und erreichbar.",
     },
     {
-      group: "Manuell",
-      title: "Manuellen Lauf starten",
+      group: "Excel-Makros",
+      title: "Hauptmappe als XLSM erstellen",
       description:
-        "In JOZI „Prozess starten“ wählen — Power Automate wird mit dem Flow „Servicegrad“ aufgerufen. Parameter nur dokumentieren; Datumslogik liegt im Subflow Get DateTime.",
+        "Erstelle die Excel-Hauptdatei Servicegradermittlung.xlsm oder deine eigene Prozessdatei. Lege die benoetigten Tabellenblaetter fuer SAP-Rohdaten, Berechnung, Ergebnis-Tabelle und Diagramm an. Speichere die Datei als makrofaehige Arbeitsmappe.",
       expectedResult:
-        "PAD-Flow läuft durch alle Subflows (siehe Live-Log in PAD, nicht in JOZI).",
+        "Die XLSM-Datei existiert, enthaelt die benoetigten Blaetter und kann Makros ausfuehren.",
     },
     {
-      group: "Nachbereitung",
-      title: "Kennzahlen-Datei prüfen",
+      group: "Excel-Makros",
+      title: "Makro fuer SAP-Datenimport bauen",
       description:
-        "Öffne Servicegrad Kennzahlen.xlsx auf dem Netzlaufwerk und prüfe, ob die aktuellen Werte für das Auswertungsdatum eingetragen wurden.",
+        "Erstelle ein VBA-Makro nach dem Muster DatenkopierenSAP. Es sucht die exportierte SG-Datei fuer das Auswertungsdatum, oeffnet sie, kopiert die Rohdaten in die Hauptmappe und schliesst die Exportdatei wieder.",
       expectedResult:
-        "Neue Spalte/Zeile für das Auswertungsdatum ist vorhanden.",
+        "Ein manueller Makrostart kopiert die SAP-Exportdaten reproduzierbar in das Rohdatenblatt.",
     },
     {
-      group: "Fehler",
-      title: "Typische Stolpersteine",
+      group: "Excel-Makros",
+      title: "Makro fuer Datenbereinigung erstellen",
       description:
-        "Montag = Auswertung für Freitag. Feiertage werden nicht erkannt. Outlook-Fehler werden im Makro still ignoriert — bei fehlender Mail zuerst PAD- und Excel-Log prüfen.",
+        "Erstelle ein Bereinigungsmakro nach dem Muster NeueBelegnummer. Normalisiere Belegnummern, Datumswerte und Uhrzeiten so, dass deine Berechnung keine manuelle Nacharbeit braucht.",
       expectedResult:
-        "Du weißt, wann ein manueller Eingriff nötig ist und wo die Detail-Doku liegt (docs/Servicegrad/Servicegrad.md).",
+        "Die importierten SAP-Daten haben stabile Spaltenformate und koennen direkt weiterverarbeitet werden.",
+    },
+    {
+      group: "Excel-Makros",
+      title: "Makro fuer Kennzahlenberechnung erstellen",
+      description:
+        "Erstelle das zentrale Berechnungsmakro nach dem Muster SGrechner. Zaehle Erreicht/Nicht Erreicht je Standort oder Kategorie, berechne die Quote und schreibe Tabelle sowie Diagrammdaten in das Ergebnisblatt.",
+      expectedResult:
+        "Die Servicegrad-Tabelle zeigt Werte fuer LC1, LC3, LC6, LC8, LC9 und ein Gesamtergebnis oder deine eigenen Zielbereiche.",
+    },
+    {
+      group: "Excel-Makros",
+      title: "Makro fuer Kennzahlenuebertragung erstellen",
+      description:
+        "Erstelle ein Makro nach dem Muster DatenUebertragung. Es oeffnet die zentrale Kennzahlen-Datei, sucht die Position fuer das Auswertungsdatum und schreibt die berechneten Werte fort.",
+      expectedResult:
+        "Die Kennzahlen-Datei wird automatisch aktualisiert, ohne bestehende Historie zu ueberschreiben.",
+    },
+    {
+      group: "Excel-Makros",
+      title: "Makro fuer E-Mail-Versand erstellen",
+      description:
+        "Erstelle ein Outlook-Makro nach dem Muster Email. Fuege Tabelle und Diagramm aus Excel in eine HTML-Mail ein, setze Betreff und Verteiler und teste zuerst mit deiner eigenen Adresse.",
+      expectedResult:
+        "Eine Testmail enthaelt die aktuelle Ergebnis-Tabelle, das Diagramm und den korrekten Betreff.",
+    },
+    {
+      group: "SAP VBScript",
+      title: "SAP GUI Scripting aktivieren",
+      description:
+        "Aktiviere in SAP GUI die Scripting-Unterstuetzung und pruefe, ob der SAP-Server Scripting erlaubt. Starte SAP neu und teste die spaetere Transaktion manuell, z.B. /LSGIT/VS_DLV_CHECK.",
+      expectedResult:
+        "SAP GUI Scripting ist nutzbar und die Transaktion laesst sich mit dem Ausfuehrungskonto oeffnen.",
+    },
+    {
+      group: "SAP VBScript",
+      title: "SAP-Ablauf aufzeichnen",
+      description:
+        "Nutze den SAP Script Recorder. Zeichne exakt die Schritte auf: System oeffnen, Transaktion starten, Selektionsdatum setzen, optionale Belegnummernfilter setzen, Layout auswaehlen und Export als Excel ausloesen.",
+      expectedResult:
+        "Eine VBS-Datei enthaelt den aufgezeichneten SAP-Ablauf von der Transaktion bis zum Exportdialog.",
+    },
+    {
+      group: "SAP VBScript",
+      title: "VBScript parametrisieren und stabilisieren",
+      description:
+        "Ersetze feste Testwerte im VBScript durch Variablen fuer Datum, Exportpfad und Dateiname. Entferne unnoetige Recorder-Zeilen, pruefe Fenster-IDs und fuege einfache Warte- oder Existenzpruefungen fuer SAP-Dialoge ein.",
+      expectedResult:
+        "Das SAP VBScript laeuft mehrfach hintereinander und schreibt die Exportdatei in den definierten Ordner.",
+    },
+    {
+      group: "Power Automate Desktop",
+      title: "PAD-Flow und Subflows anlegen",
+      description:
+        "Erstelle einen neuen Power Automate Desktop Flow. Lege Subflows nach dem Servicegrad-Muster an: Main, Get DateTime, Get SAP Data und SG Math and Email send. Main ruft die Subflows in genau dieser Reihenfolge auf.",
+      expectedResult:
+        "Der PAD-Flow hat eine klare Struktur und bildet den gesamten Prozessablauf sichtbar ab.",
+    },
+    {
+      group: "Power Automate Desktop",
+      title: "Datumsermittlung bauen",
+      description:
+        "Baue im Subflow Get DateTime die Datumslogik. Standard ist Vortag; montags wird auf Freitag zurueckgerechnet. Speichere Anzeigeformat, SAP-Format und Dateinamensformat in Variablen.",
+      expectedResult:
+        "Der Flow liefert fuer jeden Werktag das richtige Auswertungsdatum und den passenden Exportdateinamen.",
+    },
+    {
+      group: "Power Automate Desktop",
+      title: "SAP VBScript aus PAD starten",
+      description:
+        "Baue den Subflow Get SAP Data. Starte SAP bzw. die VBS-Datei, uebergib Datum und Exportpfad, warte auf die Exportdatei und brich mit klarer Fehlermeldung ab, wenn die Datei nicht entsteht.",
+      expectedResult:
+        "PAD erzeugt den SAP-Export automatisch und erkennt fehlgeschlagene Exporte.",
+    },
+    {
+      group: "Power Automate Desktop",
+      title: "Excel-Makros aus PAD ausfuehren",
+      description:
+        "Baue den Subflow SG Math and Email send. Beende stoerende Excel-Instanzen, oeffne die XLSM-Datei, fuehre die Makros in Reihenfolge aus und schliesse Excel kontrolliert.",
+      expectedResult:
+        "Ein PAD-Testlauf fuehrt Import, Berechnung, Kennzahlenuebertragung und E-Mail-Versand ohne manuelle Klicks aus.",
+    },
+    {
+      group: "Power Automate Cloud",
+      title: "Cloud-Flow als Scheduler erstellen",
+      description:
+        "Erstelle in Power Automate Cloud einen geplanten Flow, z.B. Mo-Fr um 01:00 Uhr. Waehle die Aktion zum Starten des Desktop-Flows auf dem RPA-Rechner und verbinde sie mit dem PAD-Flow.",
+      expectedResult:
+        "Der Cloud-Flow kann den Desktop-Flow geplant oder testweise manuell starten.",
+    },
+    {
+      group: "Power Automate Cloud",
+      title: "Unattended-Ausfuehrung pruefen",
+      description:
+        "Teste den Cloud-Start mit gesperrtem oder unbeaufsichtigtem RPA-Rechner, je nach Umgebung. Pruefe Machine Group, Verbindung, Benutzerkonto und ob Excel, SAP und Outlook im unattended Kontext funktionieren.",
+      expectedResult:
+        "Der Prozess startet ohne interaktive Bedienung und nutzt das richtige Windows- und SAP-Konto.",
+    },
+    {
+      group: "Testlauf",
+      title: "End-to-End-Test mit Testverteiler ausfuehren",
+      description:
+        "Fuehre den kompletten Ablauf mit Testverteiler aus: Cloud oder PAD starten, SAP-Export pruefen, XLSM-Ergebnis pruefen, Kennzahlen-Datei kontrollieren und Mailinhalt validieren.",
+      expectedResult:
+        "Alle Artefakte entstehen: SAP-Exportdatei, berechnete Tabelle, aktualisierte Kennzahlen-Datei und E-Mail.",
+    },
+    {
+      group: "Testlauf",
+      title: "Fehlerfaelle bewusst testen",
+      description:
+        "Teste typische Stoerungen: fehlendes Netzlaufwerk, gesperrte Excel-Datei, falsches SAP-Datum, fehlende Exportdatei und Outlook-Probleme. Notiere je Fehler die Meldung und den Workaround.",
+      expectedResult:
+        "Der eigene Prozess hat nachvollziehbare Fehlermeldungen und bekannte Workarounds.",
+    },
+    {
+      group: "Dokumentation",
+      title: "Eigenen Prozess in JOZI dokumentieren",
+      description:
+        "Lege deinen eigenen Prozess in JOZI an. Erfasse Business-Zweck, Systeme, Dateien, PAD-Flow, Cloud-Scheduler, SAP VBScript, Makros, Parameter, Runbook und Fehlerbehandlung.",
+      expectedResult:
+        "Der User hat in JOZI einen eigenen vollstaendig dokumentierten Prozess erstellt.",
+    },
+    {
+      group: "Dokumentation",
+      title: "Eigenes Tutorial fuer Uebergabe erstellen",
+      description:
+        "Erstelle fuer deinen Prozess ein eigenes Tutorial nach diesem Aufbau. Fuehre eine zweite Person Schritt fuer Schritt durch den Ablauf und passe unklare Stellen direkt an.",
+      expectedResult:
+        "Eine neue Person kann den Prozess anhand deines Tutorials von Anfang bis Ende nachbauen und betreiben.",
     },
   ],
 };

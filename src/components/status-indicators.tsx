@@ -4,15 +4,9 @@ import {
   FileSpreadsheetIcon,
   TerminalIcon,
 } from "lucide-react";
-import type {
-  ActionType,
-  Criticality,
-  ProcessStatus,
-  RunStatus,
-} from "@/shared/domain";
+import type { ActionType, ProcessStatus, RunStatus } from "@/shared/domain";
 import {
   ACTION_TYPE_LABELS,
-  CRITICALITY_LABELS,
   PROCESS_STATUS_LABELS,
   RUN_STATUS_LABELS,
 } from "@/shared/domain";
@@ -66,37 +60,6 @@ export function ProcessStatusBadge({ status }: { status: ProcessStatus }) {
     >
       <span className="size-1.5 rounded-full bg-current" />
       {PROCESS_STATUS_LABELS[status]}
-    </span>
-  );
-}
-
-export function CriticalityBadge({ level }: { level: Criticality }) {
-  const styles: Record<Criticality, string> = {
-    low: "text-muted-foreground",
-    medium: "text-warning",
-    high: "text-destructive",
-  };
-  const bars: Record<Criticality, number> = { low: 1, medium: 2, high: 3 };
-  return (
-    <span
-      className={cn("inline-flex items-center gap-1.5 text-xs", styles[level])}
-      title={`Kritikalität: ${CRITICALITY_LABELS[level]}`}
-    >
-      <span aria-hidden="true" className="inline-flex items-end gap-px">
-        {[1, 2, 3].map((bar) => (
-          <span
-            className={cn(
-              "w-1 rounded-[1px]",
-              bar === 1 && "h-1.5",
-              bar === 2 && "h-2.5",
-              bar === 3 && "h-3.5",
-              bar <= bars[level] ? "bg-current" : "bg-current opacity-20"
-            )}
-            key={bar}
-          />
-        ))}
-      </span>
-      {CRITICALITY_LABELS[level]}
     </span>
   );
 }

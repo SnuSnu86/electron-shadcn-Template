@@ -1,5 +1,4 @@
 import {
-  BotIcon,
   FileCode2Icon,
   FileSpreadsheetIcon,
   MonitorCogIcon,
@@ -8,6 +7,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTechnicalArtifacts } from "@/lib/queries";
 import type {
   ProcessDetail,
@@ -80,42 +80,65 @@ function ArtifactCard({ artifact }: { artifact: ProcessTechnicalArtifact }) {
   );
 }
 
-function ArtifactCategory({
-  artifacts,
-  kind,
+function ArtifactCategoriesTabs({
+  categories,
 }: {
-  artifacts: ProcessTechnicalArtifact[];
-  kind: TechnicalArtifactKind;
+  categories: {
+    artifacts: ProcessTechnicalArtifact[];
+    kind: TechnicalArtifactKind;
+  }[];
 }) {
-  const meta = KIND_META[kind];
-  const Icon = meta.icon;
+  const visibleCategories = categories.filter(
+    ({ artifacts }) => artifacts.length > 0
+  );
+  const defaultKind = visibleCategories[0]?.kind;
 
-  if (artifacts.length === 0) {
+  if (!defaultKind) {
     return null;
   }
 
   return (
-    <section className="rounded-lg border border-border/70 bg-card/70">
-      <div className="flex flex-wrap items-start justify-between gap-3 border-border/60 border-b px-4 py-3">
-        <div>
-          <h3 className="flex items-center gap-2 font-display font-semibold text-sm">
-            <Icon className="size-4 text-primary" />
-            {kind}
-          </h3>
-          <p className="mt-1 text-muted-foreground text-xs leading-relaxed">
-            {meta.description}
-          </p>
-        </div>
-        <Badge className={meta.className} variant="outline">
-          {artifacts.length} Artefakte
-        </Badge>
-      </div>
-      <div className="flex flex-col gap-3 p-3">
-        {artifacts.map((artifact) => (
-          <ArtifactCard artifact={artifact} key={artifact.id} />
-        ))}
-      </div>
-    </section>
+    <Tabs className="gap-4" defaultValue={defaultKind}>
+      <TabsList className="grid h-auto w-full grid-cols-1 gap-2 bg-transparent p-0 sm:grid-cols-3">
+        {visibleCategories.map(({ artifacts, kind }) => {
+          const meta = KIND_META[kind];
+          const Icon = meta.icon;
+
+          return (
+            <TabsTrigger
+              className="h-auto justify-start rounded-lg border border-border/70 bg-card/70 px-4 py-3 text-left data-active:border-primary/35 data-active:bg-card data-active:shadow-sm"
+              key={kind}
+              value={kind}
+            >
+              <span className="flex min-w-0 flex-1 items-start gap-3">
+                <Icon className="mt-0.5 size-4 shrink-0 text-primary" />
+                <span className="min-w-0">
+                  <span className="block font-display font-semibold text-foreground text-sm">
+                    {kind}
+                  </span>
+                  <span className="mt-1 block whitespace-normal text-muted-foreground text-xs leading-relaxed">
+                    {meta.description}
+                  </span>
+                </span>
+              </span>
+              <Badge className={meta.className} variant="outline">
+                {artifacts.length} Artefakte
+              </Badge>
+            </TabsTrigger>
+          );
+        })}
+      </TabsList>
+
+      {visibleCategories.map(({ artifacts, kind }) => (
+        <TabsContent className="mt-15" key={kind} value={kind}>
+          <div className="flex flex-col gap-3">
+            {artifacts.map((artifact) => (
+              <ArtifactCard artifact={artifact} key={artifact.id} />
+            ))}
+          </div>
+        </TabsContent>
+      ))}
+    </Tabs>
   );
 }
 
@@ -139,7 +162,7 @@ export function TechnicalDetailsTab({ process }: { process: ProcessDetail }) {
 
   return (
     <div className="flex animate-fade-in flex-col gap-4">
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="gap-4">
         <Card className="gap-3">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 font-display text-sm">
@@ -175,41 +198,10 @@ export function TechnicalDetailsTab({ process }: { process: ProcessDetail }) {
             </div>
           </CardContent>
         </Card>
-
-        <Card className="gap-3">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 font-display text-sm">
-              <BotIcon className="size-4 text-primary" />
-              Prozesslogik
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-2 text-sm">
-            {[
-              "Datum bestimmen und Wochenendlogik anwenden",
-              "SAP-Export aus /LSGIT/VS_DLV_CHECK erzeugen",
-              "Excel-Rohdaten importieren und Servicegrad berechnen",
-              "Kennzahlen-Datei aktualisieren und Diagramm übernehmen",
-              "Outlook-E-Mail mit Tabelle und Diagramm versenden",
-            ].map((step, index) => (
-              <div className="flex items-start gap-2.5" key={step}>
-                <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/15 font-display font-semibold text-[0.6875rem] text-primary">
-                  {index + 1}
-                </span>
-                <span className="leading-relaxed">{step}</span>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
       </div>
 
-      <div className="grid items-start gap-4 xl:grid-cols-3">
-        {artifactsByKind.map(({ artifacts: categoryArtifacts, kind }) => (
-          <ArtifactCategory
-            artifacts={categoryArtifacts}
-            key={kind}
-            kind={kind}
-          />
-        ))}
+      <div>
+        <ArtifactCategoriesTabs categories={artifactsByKind} />
         {artifacts.length === 0 && (
           <Card>
             <CardContent className="py-8 text-center text-muted-foreground text-sm">

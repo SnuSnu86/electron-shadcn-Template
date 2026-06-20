@@ -11,7 +11,6 @@ import {
 } from "@/main/db/repository";
 import {
   ACTION_TYPE_LABELS,
-  CRITICALITY_LABELS,
   FREQUENCY_LABELS,
   PROCESS_STATUS_LABELS,
   type ProcessDetail,
@@ -40,7 +39,6 @@ export function renderProcessMarkdown(
   lines.push("| Feld | Wert |");
   lines.push("| --- | --- |");
   lines.push(`| Kategorie | ${detail.category} |`);
-  lines.push(`| Kritikalität | ${CRITICALITY_LABELS[detail.criticality]} |`);
   lines.push(`| Frequenz | ${FREQUENCY_LABELS[detail.frequency]} |`);
   lines.push(`| Status | ${PROCESS_STATUS_LABELS[detail.status]} |`);
   lines.push(`| Business Owner | ${detail.businessOwner} |`);

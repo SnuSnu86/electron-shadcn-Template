@@ -16,7 +16,6 @@ import { toast } from "sonner";
 import { z } from "zod";
 import {
   ActionTypeBadge,
-  CriticalityBadge,
   ProcessStatusBadge,
 } from "@/components/status-indicators";
 import {
@@ -172,7 +171,6 @@ function ProcessDetailPage() {
             </p>
             <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
               <ProcessStatusBadge status={process.status} />
-              <CriticalityBadge level={process.criticality} />
               <span className="text-muted-foreground text-xs">
                 {FREQUENCY_LABELS[process.frequency]}
               </span>

@@ -26,8 +26,6 @@ import { type ProcessInput, useInvalidateProcessData } from "@/lib/queries";
 import {
   ACTION_TYPE_LABELS,
   type ActionType,
-  CRITICALITY_LABELS,
-  type Criticality,
   type DiagramNodeKind,
   FREQUENCY_LABELS,
   type Frequency,
@@ -53,7 +51,6 @@ interface EditorForm {
   businessOwner: string;
   category: string;
   command: string;
-  criticality: Criticality;
   cwd: string;
   descriptionLong: string;
   descriptionShort: string;
@@ -91,7 +88,6 @@ const EMPTY_FORM: EditorForm = {
   businessOwner: "",
   technicalOwner: "",
   category: "Allgemein",
-  criticality: "medium",
   frequency: "ondemand",
   status: "active",
   systems: "",
@@ -139,7 +135,6 @@ function detailToForm(detail: ProcessDetail): EditorForm {
     businessOwner: detail.businessOwner,
     technicalOwner: detail.technicalOwner,
     category: detail.category,
-    criticality: detail.criticality,
     frequency: detail.frequency,
     status: detail.status,
     systems: detail.systems.join(", "),
@@ -202,7 +197,6 @@ function formToInput(form: EditorForm): ProcessInput {
     businessOwner: form.businessOwner,
     technicalOwner: form.technicalOwner,
     category: form.category || "Allgemein",
-    criticality: form.criticality,
     frequency: form.frequency,
     status: form.status,
     systems: form.systems
@@ -405,25 +399,6 @@ export default function ProcessEditorDialog({
                   onChange={(e) => set("technicalOwner", e.target.value)}
                   value={form.technicalOwner}
                 />
-              </Field>
-              <Field label="Kritikalität">
-                <Select
-                  onValueChange={(v) => set("criticality", v as Criticality)}
-                  value={form.criticality}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(Object.keys(CRITICALITY_LABELS) as Criticality[]).map(
-                      (c) => (
-                        <SelectItem key={c} value={c}>
-                          {CRITICALITY_LABELS[c]}
-                        </SelectItem>
-                      )
-                    )}
-                  </SelectContent>
-                </Select>
               </Field>
               <Field label="Frequenz">
                 <Select

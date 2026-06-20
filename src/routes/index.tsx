@@ -1,17 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   ActivityIcon,
-  AlertTriangleIcon,
   ArrowRightIcon,
   CheckCircle2Icon,
   LayersIcon,
-  ShieldAlertIcon,
 } from "lucide-react";
 import { AnimatedNumber } from "@/components/animated-number";
-import {
-  CriticalityBadge,
-  RunStatusBadge,
-} from "@/components/status-indicators";
+import { RunStatusBadge } from "@/components/status-indicators";
 import { Card, CardContent } from "@/components/ui/card";
 import { useDashboard } from "@/lib/queries";
 import { formatDuration, formatRelative } from "@/utils/format";
@@ -95,12 +90,11 @@ function DashboardPage() {
           Dashboard
         </h1>
         <p className="mt-1 text-muted-foreground text-sm">
-          Alle Automationen auf einen Blick — Status, Läufe und kritische
-          Prozesse.
+          Alle Automationen auf einen Blick — Status und Läufe.
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 xl:grid-cols-3">
         <StatCard
           delay={40}
           hint={`davon ${stats?.activeProcesses ?? 0} aktiv`}
@@ -131,19 +125,11 @@ function DashboardPage() {
           }
           value={stats?.successRate30Days ?? null}
         />
-        <StatCard
-          delay={160}
-          hint="Kritikalität: Hoch"
-          icon={ShieldAlertIcon}
-          label="Kritische Prozesse"
-          tone="destructive"
-          value={stats?.highCriticality ?? null}
-        />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-5">
+      <div className="grid gap-4">
         <Card
-          className="animate-fade-up gap-0 py-0 lg:col-span-3"
+          className="animate-fade-up gap-0 py-0"
           style={{ animationDelay: "200ms" }}
         >
           <div className="flex items-center justify-between border-border/60 border-b px-4 py-3">
@@ -190,55 +176,6 @@ function DashboardPage() {
                       {formatRelative(run.startedAt)}
                     </span>
                   </button>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-
-        <Card
-          className="animate-fade-up gap-0 py-0 lg:col-span-2"
-          style={{ animationDelay: "240ms" }}
-        >
-          <div className="flex items-center gap-2 border-border/60 border-b px-4 py-3">
-            <AlertTriangleIcon className="size-4 text-destructive" />
-            <h2 className="font-display font-semibold text-sm">
-              Kritische Prozesse
-            </h2>
-          </div>
-          <CardContent className="p-0">
-            {stats?.criticalProcesses.length === 0 && (
-              <p className="px-4 py-8 text-center text-muted-foreground text-sm">
-                Keine Prozesse mit hoher Kritikalität.
-              </p>
-            )}
-            <ul className="divide-y divide-border/60">
-              {stats?.criticalProcesses.map((process, i) => (
-                <li
-                  className="animate-fade-up"
-                  key={process.id}
-                  style={{ animationDelay: `${280 + i * 30}ms` }}
-                >
-                  <Link
-                    className="flex flex-col gap-1 px-4 py-2.5 transition-colors hover:bg-accent/50"
-                    params={{ processId: String(process.id) }}
-                    to="/prozesse/$processId"
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="truncate font-medium text-[0.8125rem]">
-                        {process.name}
-                      </span>
-                      <CriticalityBadge level={process.criticality} />
-                    </div>
-                    <div className="flex items-center justify-between gap-2 text-[0.6875rem] text-muted-foreground">
-                      <span>
-                        Letzter Lauf: {formatRelative(process.lastRunAt)}
-                      </span>
-                      {process.lastRunStatus && (
-                        <RunStatusBadge status={process.lastRunStatus} />
-                      )}
-                    </div>
-                  </Link>
                 </li>
               ))}
             </ul>

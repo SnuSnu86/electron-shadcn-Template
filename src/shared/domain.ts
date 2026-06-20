@@ -3,7 +3,6 @@
  * Die JSON-Spalten der SQLite-Tabellen werden hier als strukturierte Typen abgebildet.
  */
 
-export type Criticality = "low" | "medium" | "high";
 export type Frequency = "adhoc" | "daily" | "weekly" | "monthly" | "ondemand";
 export type ProcessStatus = "active" | "deprecated" | "maintenance";
 export type ActionType = "shell" | "pad" | "cloudflow" | "file";
@@ -110,7 +109,6 @@ export interface ProcessSummary {
   actionType: ActionType;
   businessOwner: string;
   category: string;
-  criticality: Criticality;
   descriptionShort: string;
   favorite: boolean;
   frequency: Frequency;
@@ -212,9 +210,7 @@ export interface Tutorial {
 export interface DashboardStats {
   activeProcesses: number;
   categories: { category: string; count: number }[];
-  criticalProcesses: ProcessSummary[];
   failedLast30Days: number;
-  highCriticality: number;
   recentRuns: ProcessRun[];
   runningNow: number;
   runsLast30Days: number;
@@ -222,12 +218,6 @@ export interface DashboardStats {
   totalProcesses: number;
   totalRuns: number;
 }
-
-export const CRITICALITY_LABELS: Record<Criticality, string> = {
-  low: "Niedrig",
-  medium: "Mittel",
-  high: "Hoch",
-};
 
 export const FREQUENCY_LABELS: Record<Frequency, string> = {
   adhoc: "Ad-hoc",

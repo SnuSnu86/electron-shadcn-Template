@@ -65,7 +65,7 @@ export function TutorialWizard({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex animate-fade-in flex-col bg-background/97 backdrop-blur-sm">
+    <div className="relative z-50 flex h-[calc(100dvh-16rem)] max-h-[calc(100dvh-16rem)] min-h-[30rem] animate-fade-in flex-col overflow-hidden bg-background/97 backdrop-blur-sm">
       {/* Kopfzeile */}
       <div className="flex items-center gap-4 border-border/60 border-b px-6 py-4">
         <span className="flex size-9 items-center justify-center rounded-lg bg-primary/15 text-primary">
@@ -93,7 +93,7 @@ export function TutorialWizard({
         </Button>
       </div>
 
-      <div className="flex min-h-0 flex-1">
+      <div className="flex min-h-0 flex-1 overflow-hidden">
         {/* Schritt-Navigation */}
         <aside className="w-72 shrink-0 overflow-y-auto border-border/60 border-r p-4">
           {groups.length > 0
@@ -186,7 +186,7 @@ export function TutorialWizard({
               step && (
                 <motion.div
                   animate={{ opacity: 1, x: 0 }}
-                  className="flex flex-1 flex-col overflow-y-auto p-8"
+                  className="flex min-h-0 flex-1 flex-col overflow-y-auto p-8"
                   custom={direction}
                   exit={{ opacity: 0, x: direction * -40 }}
                   initial={{ opacity: 0, x: direction * 40 }}
@@ -254,7 +254,7 @@ export function TutorialWizard({
 
           {/* Fußzeile */}
           {!finished && (
-            <div className="flex items-center justify-between border-border/60 border-t px-8 py-4">
+            <div className="z-10 flex shrink-0 items-center justify-between border-border/60 border-t bg-background/97 px-8 py-4 backdrop-blur-sm">
               <Button
                 disabled={index === 0}
                 onClick={() => goTo(index - 1)}

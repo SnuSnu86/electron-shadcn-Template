@@ -10,6 +10,8 @@ import { servicegradTechnicalArtifacts } from "./processes/servicegrad-artifacts
 import {
   createProcess,
   deleteProcess,
+  deleteTutorial,
+  getTutorialByProcess,
   listTechnicalArtifacts,
   replaceTechnicalArtifacts,
   upsertParameter,
@@ -62,11 +64,30 @@ export function seedServicegradIfMissing(): void {
   }
 
   if (existing) {
+    syncServicegradTutorial(processId);
     return;
   }
 
   for (const param of servicegradParameters) {
     upsertParameter({ ...param, processId });
+  }
+
+  syncServicegradTutorial(processId);
+}
+
+function syncServicegradTutorial(processId: number): void {
+  const existingTutorial = getTutorialByProcess(processId);
+  const isOldSeedTutorial =
+    existingTutorial?.title === "Servicegrad-Lauf verstehen und prüfen" ||
+    (existingTutorial?.title === servicegradTutorial.title &&
+      existingTutorial.steps.length !== servicegradTutorial.steps.length);
+
+  if (existingTutorial && isOldSeedTutorial) {
+    deleteTutorial(existingTutorial.id);
+  }
+
+  if (existingTutorial && !isOldSeedTutorial) {
+    return;
   }
 
   const tutorialId = upsertTutorial(

@@ -14,7 +14,6 @@ CREATE TABLE IF NOT EXISTS processes (
   business_owner TEXT NOT NULL DEFAULT '',
   technical_owner TEXT NOT NULL DEFAULT '',
   category TEXT NOT NULL DEFAULT 'Allgemein',
-  criticality TEXT NOT NULL DEFAULT 'medium',
   frequency TEXT NOT NULL DEFAULT 'ondemand',
   status TEXT NOT NULL DEFAULT 'active',
   systems_json TEXT NOT NULL DEFAULT '[]',
@@ -105,6 +104,19 @@ CREATE INDEX IF NOT EXISTS idx_steps_tutorial ON tutorial_steps(tutorial_id);
 CREATE INDEX IF NOT EXISTS idx_artifacts_process ON process_technical_artifacts(process_id);
 `;
 
+function columnExists(table: string, column: string): boolean {
+  const rows = getDb().prepare(`PRAGMA table_info(${table})`).all() as {
+    name: string;
+  }[];
+  return rows.some((row) => row.name === column);
+}
+
+function runMigrations(): void {
+  if (columnExists("processes", "criticality")) {
+    getDb().exec("ALTER TABLE processes DROP COLUMN criticality");
+  }
+}
+
 export function getDbPath(): string {
   const portableDataDir = process.env.JOZI_PORTABLE_DATA_DIR;
   if (portableDataDir) {
@@ -127,6 +139,7 @@ export function getDb(): DatabaseSync {
     db.exec("PRAGMA journal_mode = WAL");
     db.exec("PRAGMA foreign_keys = ON");
     db.exec(SCHEMA);
+    runMigrations();
   }
   return db;
 }

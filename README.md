@@ -8,7 +8,7 @@ RPA-Automationen (Power Automate Desktop, Cloud-Flows, Skripte, Excel-Makros) si
 
 Konkret hilft sie dabei:
 
-- **Prozesse zu katalogisieren** — mit Stammdaten, Kritikalität, Owner, Systemen und Tags
+- **Prozesse zu katalogisieren** — mit Stammdaten, Owner, Systemen und Tags
 - **Wissen zu dokumentieren** — Runbooks, Business-Sicht (Ist/Soll/Nutzen), Ablaufdiagramme, technische Details
 - **Prozesse zu starten und zu überwachen** — inkl. Parameter, Laufprotokoll und Erfolgsquote
 - **Wissen zu exportieren** — JSON, Markdown-Runbooks und Datenbank-Backup für Audits und Übergaben
@@ -17,11 +17,11 @@ Konkret hilft sie dabei:
 
 ### Leitstand
 
-Dashboard mit Kennzahlen auf einen Blick: Anzahl Prozesse, Läufe der letzten 30 Tage, Erfolgsquote, kritische Prozesse sowie die letzten Ausführungen.
+Dashboard mit Kennzahlen auf einen Blick: Anzahl Prozesse, Läufe der letzten 30 Tage, Erfolgsquote sowie die letzten Ausführungen.
 
 ### Prozesskatalog
 
-Durchsuchbare und filterbare Liste aller Automationen. Filter nach Kategorie, Kritikalität, Status, Tags und Favoriten. Prozesse können als Favorit markiert werden.
+Durchsuchbare und filterbare Liste aller Automationen. Filter nach Kategorie, Status, Tags und Favoriten. Prozesse können als Favorit markiert werden.
 
 ### Prozessdetail
 

@@ -11,7 +11,6 @@ import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 import {
   ActionTypeBadge,
-  CriticalityBadge,
   ProcessStatusBadge,
   RunStatusBadge,
 } from "@/components/status-indicators";
@@ -35,15 +34,8 @@ import {
 } from "@/components/ui/table";
 import ProcessEditorDialog from "@/features/process-editor/process-editor-dialog";
 import { ipc } from "@/ipc/manager";
+import { queryKeys, useCategories, useProcesses, useTags } from "@/lib/queries";
 import {
-  queryKeys,
-  useCategories,
-  useProcesses,
-  useTags,
-} from "@/lib/queries";
-import {
-  CRITICALITY_LABELS,
-  type Criticality,
   FREQUENCY_LABELS,
   PROCESS_STATUS_LABELS,
   type ProcessStatus,
@@ -54,16 +46,14 @@ import { cn } from "@/utils/tailwind";
 const searchSchema = z.object({
   q: z.string().optional(),
   kategorie: z.string().optional(),
-  krit: z.enum(["low", "medium", "high"]).optional(),
   status: z.enum(["active", "deprecated", "maintenance"]).optional(),
   tag: z.string().optional(),
   fav: z.boolean().optional(),
-  sort: z.enum(["name", "krit", "lastRun", "freq"]).optional(),
+  sort: z.enum(["name", "lastRun", "freq"]).optional(),
 });
 
 type CatalogSearch = z.infer<typeof searchSchema>;
 
-const CRIT_ORDER: Record<Criticality, number> = { high: 0, medium: 1, low: 2 };
 const FREQ_ORDER = ["daily", "weekly", "monthly", "ondemand", "adhoc"];
 
 const ALL = "__alle__";
@@ -96,7 +86,6 @@ function CatalogPage() {
     () => ({
       search: search.q,
       category: search.kategorie,
-      criticality: search.krit,
       status: search.status,
       tag: search.tag,
       favoritesOnly: search.fav,
@@ -111,11 +100,6 @@ function CatalogPage() {
   const sorted = useMemo(() => {
     const list = [...(processes ?? [])];
     switch (search.sort) {
-      case "krit":
-        list.sort(
-          (a, b) => CRIT_ORDER[a.criticality] - CRIT_ORDER[b.criticality]
-        );
-        break;
       case "lastRun":
         list.sort((a, b) =>
           (b.lastRunAt ?? "").localeCompare(a.lastRunAt ?? "")
@@ -140,12 +124,7 @@ function CatalogPage() {
     });
 
   const hasFilters =
-    search.q ||
-    search.kategorie ||
-    search.krit ||
-    search.status ||
-    search.tag ||
-    search.fav;
+    search.q || search.kategorie || search.status || search.tag || search.fav;
 
   const toggleFavorite = async (id: number) => {
     await ipc.client.catalog.toggleFavorite({ id });
@@ -204,24 +183,6 @@ function CatalogPage() {
         </Select>
         <Select
           onValueChange={(v) =>
-            updateSearch({ krit: v === ALL ? undefined : (v as Criticality) })
-          }
-          value={search.krit ?? ALL}
-        >
-          <SelectTrigger className="w-36">
-            <SelectValue placeholder="Kritikalität" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL}>Jede Kritikalität</SelectItem>
-            {(Object.keys(CRITICALITY_LABELS) as Criticality[]).map((c) => (
-              <SelectItem key={c} value={c}>
-                {CRITICALITY_LABELS[c]}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select
-          onValueChange={(v) =>
             updateSearch({
               status: v === ALL ? undefined : (v as ProcessStatus),
             })
@@ -256,7 +217,6 @@ function CatalogPage() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="name">Name</SelectItem>
-            <SelectItem value="krit">Kritikalität</SelectItem>
             <SelectItem value="lastRun">Letzter Lauf</SelectItem>
             <SelectItem value="freq">Frequenz</SelectItem>
           </SelectContent>
@@ -324,7 +284,6 @@ function CatalogPage() {
               <TableHead className="w-8" />
               <TableHead>Prozess</TableHead>
               <TableHead>Kategorie</TableHead>
-              <TableHead>Kritikalität</TableHead>
               <TableHead>Frequenz</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Letzter Lauf</TableHead>
@@ -336,7 +295,7 @@ function CatalogPage() {
               <TableRow>
                 <TableCell
                   className="h-32 text-center text-muted-foreground"
-                  colSpan={8}
+                  colSpan={7}
                 >
                   Lade Prozesse …
                 </TableCell>
@@ -346,7 +305,7 @@ function CatalogPage() {
               <TableRow>
                 <TableCell
                   className="h-32 text-center text-muted-foreground"
-                  colSpan={8}
+                  colSpan={7}
                 >
                   Keine Prozesse gefunden.
                   {hasFilters && " Filter anpassen oder zurücksetzen."}
@@ -394,9 +353,6 @@ function CatalogPage() {
                 </TableCell>
                 <TableCell className="text-muted-foreground text-xs">
                   {process.category}
-                </TableCell>
-                <TableCell>
-                  <CriticalityBadge level={process.criticality} />
                 </TableCell>
                 <TableCell className="text-muted-foreground text-xs">
                   {FREQUENCY_LABELS[process.frequency]}
