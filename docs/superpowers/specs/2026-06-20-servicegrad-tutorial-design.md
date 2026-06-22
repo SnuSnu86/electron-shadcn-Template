@@ -25,6 +25,20 @@ Die bisherigen allgemeinen Schritte "Automatisierungsziel festlegen",
 "eigener Prozess" und "eigene Zielbereiche" entfallen oder werden durch
 Servicegrad-spezifische Anweisungen ersetzt.
 
+## Ausführbarer Code im Tutorial
+
+Jeder Tutorial-Schritt für VBA, SAP-Scripting und Power Automate Desktop zeigt
+den dazugehörigen kopierbaren Quelltext direkt in der Schrittbeschreibung.
+Die VBA-Schritte enthalten außerdem eine kurze Anleitung zum Öffnen des
+VBA-Editors, Anlegen eines Standardmoduls, Einfügen des Codes und Speichern
+als `.xlsm`. Die bestehenden, versionierten Quelldateien unter
+`docs/Servicegrad/` bleiben die einzige Quelle dieses Codes; das Tutorial
+bindet die passenden Abschnitte daraus ein, statt Kopien zu pflegen.
+
+Alle produktiven Pfade, Konten und Empfänger werden in den eingebetteten
+Beispielen als ausdrücklich anzupassende Werte markiert. Der erste Mailtest
+geht ausschließlich an eine eigene Testadresse.
+
 ## Speicherung und Aktualisierung
 
 `servicegrad.ts` bleibt die versionierte Quellbeschreibung des ausgelieferten
@@ -47,7 +61,8 @@ angepasst.
 
 ## Tests
 
-Unit-Tests prüfen den neuen fachlichen Inhalt und vermeiden Begriffe, die einen
-allgemeinen oder fremden Prozess suggerieren. Zusätzliche Seeder-Tests prüfen
+Unit-Tests prüfen den neuen fachlichen Inhalt, die Einfügeanleitung und die
+eingebetteten Codearten (VBA, VBScript und PAD) und vermeiden Begriffe, die
+einen allgemeinen oder fremden Prozess suggerieren. Zusätzliche Seeder-Tests prüfen
 das Anlegen, das Aktualisieren eines unveränderten Standards und den Erhalt
 eines manuell geänderten Tutorials.

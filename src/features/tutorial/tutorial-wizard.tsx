@@ -10,24 +10,42 @@ import { AnimatePresence, motion } from "motion/react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
 import type { Tutorial } from "@/shared/domain";
 import { cn } from "@/utils/tailwind";
+import { TutorialInlineText, TutorialRichText } from "./tutorial-rich-text";
 
 interface StepState {
   completedAt: string | null;
   done: boolean;
 }
 
+interface TutorialWizardProps {
+  onClose: () => void;
+  processName: string;
+  tutorial: Tutorial;
+}
+
+export function TutorialDialog(props: TutorialWizardProps) {
+  return (
+    <Dialog onOpenChange={(open) => !open && props.onClose()} open>
+      <DialogContent
+        aria-describedby={undefined}
+        className="h-[min(92dvh,56rem)] max-w-[calc(100%-2rem)] gap-0 overflow-hidden p-0 sm:max-w-6xl"
+        showCloseButton={false}
+      >
+        <TutorialWizard {...props} />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export function TutorialWizard({
   tutorial,
   processName,
   onClose,
-}: {
-  tutorial: Tutorial;
-  processName: string;
-  onClose: () => void;
-}) {
+}: TutorialWizardProps) {
   const steps = tutorial.steps;
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState(1);
@@ -65,7 +83,7 @@ export function TutorialWizard({
   };
 
   return (
-    <div className="relative z-50 flex h-[calc(100dvh-16rem)] max-h-[calc(100dvh-16rem)] min-h-[30rem] animate-fade-in flex-col overflow-hidden bg-background/97 backdrop-blur-sm">
+    <div className="relative flex h-full min-h-0 animate-fade-in flex-col overflow-hidden bg-background/97 backdrop-blur-sm">
       {/* Kopfzeile */}
       <div className="flex items-center gap-4 border-border/60 border-b px-6 py-4">
         <span className="flex size-9 items-center justify-center rounded-lg bg-primary/15 text-primary">
@@ -75,9 +93,11 @@ export function TutorialWizard({
           <p className="font-medium text-[0.6875rem] text-primary uppercase tracking-widest">
             Tutorial — {processName}
           </p>
-          <h2 className="truncate font-display font-semibold text-lg">
-            {tutorial.title}
-          </h2>
+          <DialogTitle asChild>
+            <h2 className="truncate font-display font-semibold text-lg">
+              {tutorial.title}
+            </h2>
+          </DialogTitle>
         </div>
         <div className="flex w-56 flex-col gap-1.5">
           <div className="flex justify-between text-[0.6875rem] text-muted-foreground">
@@ -205,9 +225,10 @@ export function TutorialWizard({
                       </span>{" "}
                       {step.title}
                     </h3>
-                    <p className="mt-4 text-[0.9375rem] leading-relaxed">
-                      {step.description}
-                    </p>
+                    <TutorialRichText
+                      className="mt-4 space-y-4 text-[0.9375rem] leading-relaxed"
+                      text={step.description}
+                    />
 
                     {step.expectedResult && (
                       <div className="mt-6 rounded-lg border border-success/25 bg-success/8 p-4">
@@ -216,7 +237,7 @@ export function TutorialWizard({
                           Erwartetes Ergebnis
                         </p>
                         <p className="text-sm leading-relaxed">
-                          {step.expectedResult}
+                          <TutorialInlineText text={step.expectedResult} />
                         </p>
                       </div>
                     )}

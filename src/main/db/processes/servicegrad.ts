@@ -1,5 +1,7 @@
 import { buildPadRunUrl } from "@/main/execution/pad-url";
 import type { FlowDiagram, ProcessAction } from "@/shared/domain";
+import macrosMarkdown from "../../../../docs/Servicegrad/Makros.md?raw";
+import padMarkdown from "../../../../docs/Servicegrad/PAD.md?raw";
 import type { ProcessInput } from "../repository";
 
 /** Eindeutiger Prozessname in der App-Datenbank. */
@@ -12,6 +14,30 @@ const KENNZAHLEN_FILE =
   "\\\\adsgroup\\Group\\UIL-CL-Zentral\\04 Statistiken & Auswertungen\\01 Statistiken\\Servicegrad LO\\Geschaeftsjahr 2526\\Servicegrad LSS Bot\\Servicegrad Kennzahlen.xlsx";
 const SERVICEGRAD_PAD_ENVIRONMENT_ID = "f5eaa9d6-cb8e-e5b2-b60a-4aa38e133e46";
 const SERVICEGRAD_PAD_WORKFLOW_ID = "0fdc73b7-78b9-4b4e-887a-ca73268683a8";
+
+function markdownSection(markdown: string, heading: string): string {
+  const escapedHeading = heading.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const headingPattern = new RegExp(`^##\\s+${escapedHeading}\\s*$`, "m");
+  const match = headingPattern.exec(markdown);
+
+  if (!match || match.index === undefined) {
+    throw new Error(`Servicegrad-Codeabschnitt nicht gefunden: ${heading}`);
+  }
+
+  const start = match.index;
+  const nextHeading = /^##\s+/gm;
+  nextHeading.lastIndex = start + match[0].length;
+  const end = nextHeading.exec(markdown)?.index;
+  return markdown.slice(start, end).trim();
+}
+
+function excelMacroStep(instruction: string, macroName: string): string {
+  return `${instruction}
+
+**So fügst du das Makro in Excel ein:** Öffne **Servicegradermittlung.xlsm**. Drücke **Alt + F11**, wähle im VBA-Editor **Einfügen > Modul**, füge den folgenden Code in das neue Standardmodul ein und speichere die Arbeitsmappe wieder als **Excel-Arbeitsmappe mit Makros (*.xlsm)**. Starte es zum Testen über **Alt + F8**.
+
+${markdownSection(macrosMarkdown, macroName)}`;
+}
 
 function linearDiagram(
   items: {
@@ -44,7 +70,7 @@ export const servicegradInput: ProcessInput = {
   descriptionShort:
     "Tägliche Servicegrad-Ermittlung für LC1, LC3, LC6, LC8 und LC9 aus SAP-Lieferdaten mit Excel-Auswertung und E-Mail-Versand.",
   descriptionLong:
-    "Servicegrad-Ermittlungsprozesses: Power Automate Cloud Scheduler (Mo–Fr 01:00) startet einen Power-Automate-Desktop-Flow, der SAP-Daten per GUI Scripting exportiert, in Servicegradermittlung.xlsm berechnet, Kennzahlen in eine Reporting-Datei überträgt und das Ergebnis per Outlook an den Verteiler sendet. Standorte: WM Stuttgart LC1, WM Ludwigsburg LC6, WM Hannover LC3, WM Polen LC9, WM Illingen LC8. Vollständige technische Beschreibung: docs/Servicegrad/Servicegrad.md",
+    "Servicegrad-Ermittlungsprozesses: Power Automate Cloud Scheduler (Mo–Fr 01:00) startet einen Power-Automate-Desktop-Flow, der SAP-Daten per GUI Skripting exportiert, in Servicegradermittlung.xlsm berechnet, Kennzahlen in eine Reporting-Datei überträgt und das Ergebnis per Outlook an den Verteiler sendet. Standorte: WM Stuttgart LC1, WM Ludwigsburg LC6, WM Hannover LC3, WM Polen LC9, WM Illingen LC8. Vollständige technische Beschreibung: docs/Servicegrad/Servicegrad.md",
   businessOwner: "LSS / Servicegrad LO",
   technicalOwner: "RPA-Team",
   category: "SAP",
@@ -130,7 +156,7 @@ export const servicegradInput: ProcessInput = {
     whenToUse:
       "Automatisch Mo–Fr um 01:00 Uhr (Cloud Scheduler). Manueller Nachlauf nur bei ausgebliebenem Nachtlauf, Korrekturläufen oder Tests — nicht parallel zum Scheduler.",
     prerequisites: [
-      "SAP GUI Scripting ist aktiviert",
+      "SAP GUI Skripting ist aktiviert",
       "SAP-Benutzer 5100LSS1 mit Berechtigung für /LSGIT/VS_DLV_CHECK",
       `Lokaler Ordner vorhanden: ${SAP_EXPORT_DIR}`,
       `Netzwerkpfade erreichbar: G:\\UIL-CL-Zentral\\... und ${KENNZAHLEN_FILE}`,
@@ -159,9 +185,9 @@ export const servicegradInput: ProcessInput = {
           "Keine Feiertagslogik im Flow — am Dienstag nach Feiertag wird der Feiertag als Vortag verwendet, für den keine SAP-Daten existieren. Manuell mit korrektem Datum nachfahren oder warten bis nächster Werktag.",
       },
       {
-        problem: "SAP-Export schlägt fehl (Scripting / Berechtigung)",
+        problem: "SAP-Export schlägt fehl (Skripting / Berechtigung)",
         solution:
-          "SAP GUI Scripting in den Optionen aktivieren, Anmeldung PS4/Mandant 009 mit 5100LSS1 prüfen, Transaktion /LSGIT/VS_DLV_CHECK manuell testen.",
+          "SAP GUI Skripting in den Optionen aktivieren, Anmeldung PS4/Mandant 009 mit 5100LSS1 prüfen, Transaktion /LSGIT/VS_DLV_CHECK manuell testen.",
         escalation: "SAP-Basis / RPA-Team",
       },
       {
@@ -265,13 +291,13 @@ export const servicegradParameters = [
 export const servicegradTutorial = {
   title: "Servicegrad-Prozess selbst nachbauen",
   description:
-    "Geführter Aufbau des bestehenden Servicegrad-Prozesses auf einem eigenen Rechner: Dateien und Makros erstellen, SAP GUI Scripting aufnehmen, Power Automate Desktop und Cloud einrichten, testen und dokumentieren.",
+    "Lerne wie der Servicegrad Prozess funktioniert und baue deinen eigenen Servicegrad-Prozess auf deinem Rechner nach. Dieses Tutorial führt dich Schritt für Schritt durch den Prozess und erklärt, wie du die einzelnen Komponenten einrichtest.",
   steps: [
     {
       group: "Überblick",
       title: "Servicegrad-Ablauf verstehen",
       description:
-        "Der feste Ablauf ist: SAP-Lieferdaten exportieren, den Servicegrad in Excel berechnen, Kennzahlen fortschreiben und das Ergebnis per E-Mail versenden. Die folgenden Schritte richten genau diesen Ablauf auf deinem Rechner ein.",
+        "Der feste Ablauf ist: Bestimmt das Auswertungsdatum, exportiert die SAP-Lieferdaten, berechnet den Servicegrad in Excel, schreibt die Kennzahlen in eine Datei und versendet das Ergebnis per E-Mail. Mit den folgenden Schritten richtest du deine eigene Servicegrad automatisierung ein.",
       expectedResult:
         "Du kennst Eingabe, Verarbeitung und Ergebnis des Servicegrad-Prozesses.",
     },
@@ -279,129 +305,149 @@ export const servicegradTutorial = {
       group: "Vorbereitung",
       title: "Systemzugänge und Berechtigungen prüfen",
       description:
-        "Prüfe auf deinem Rechner SAP GUI mit Zugriff auf PS4/Mandant 009, aktivierbares SAP GUI Scripting, Excel mit Makro-Unterstützung, Power Automate Desktop, Power Automate Cloud und Outlook. Stelle außerdem sicher, dass du auf die benötigten SAP-Daten und Zielordner zugreifen kannst.",
+        "Prüfe auf deinem Rechner SAP GUI mit Zugriff auf PS4/Mandant 009, aktivierbares SAP GUI Skripting, Excel mit Makro-Unterstützung, Power Automate Desktop, Power Automate Cloud und Outlook. Stelle außerdem sicher, dass du auf die benötigten SAP-Daten und Zielordner zugreifen kannst.",
       expectedResult:
         "Alle benötigten Programme, Zugänge und Konfigurationen stehen für den Nachbau bereit.",
     },
     {
       group: "Vorbereitung",
-      title: "Arbeitsordner und Dateinamen anlegen",
-      description:
-        "Lege auf deinem Rechner einen eigenen Arbeitsordner und einen Exportordner an. Definiere das Dateinamensschema SG-<Datum>.xlsx sowie die Speicherorte für Hauptmappe, Kennzahlen-Datei und VBScript. Du bestimmst diese Pfade selbst.",
+      title: "SAP-Vorbereitung für das GUI Skripting",
+      description: `Prüfe zuerst die SAP GUI Skripting-Unterstützung und die Sicherheitskonfiguration in deinen SAP Einstellungen, damit die Skripte Barrierefrei ausführbar sind:
+
+- [[Optionen|images/SAP/SAP-optionen.png]]: In deinem **SAP Logon 800** klicke auf das SAP Icon oben links und wähle **Optionen**.
+- [[Skriptunterstützung|images/SAP/SAP-Scripting.png]]: Unter dem Reiter **Barrierefreiheit & Skripting** den Menüpunkt **Skriptunterstützung** aktivieren und in der Checkbox **Skriptunterstützung aktivieren**.
+- [[Sicherheit|images/SAP/SAP-Sicherheit.png]]: Unter dem Reiter **Sicherheit** den Menüpunkt **Sicherheitskonfiguration** setze den **Status** auf **Deaktiviert**.`,
       expectedResult:
-        "Arbeitsordner, Exportordner, Hauptdatei, Kennzahlen-Datei, VBScript und Dateinamensschema sind festgelegt und erreichbar.",
+        "SAP GUI Skripting ist nutzbar, die Transaktion öffnet sich und der lokale Exportordner existiert.",
     },
     {
       group: "Vorbereitung",
-      title: "Pfade in allen Bestandteilen hinterlegen",
+      title: "SAP Berechtigung für Transaktion prüfen",
       description:
-        "Übertrage die von dir gewählten Speicherorte einheitlich in den PAD-Flow, das VBScript und die VBA-Makros. Prüfe insbesondere Exportpfad, Dateiname, Hauptmappe und Kennzahlen-Datei.",
+        "Öffne das PS4 -Production S/4 HANA Modul und prüfe die Berechtigung für die Transaktion `/n/LSGIT/VS_DLV_CHECK`, indem du oben links im [[Eingabefeld|images/SAP/SAP-Transaktion.png]] den Text `/n/LSGIT/VS_DLV_CHECK` eingibst und Enter drückst. Wenn die Transaktion sich öffnet hast du die Berechtigung.",
       expectedResult:
-        "PAD-Flow, VBScript und VBA-Makros verwenden dieselben, auf deinem Rechner gültigen Pfade.",
+        "Die Transaktion öffnet sich ohne Fehlermeldung.",
     },
     {
-      group: "Excel-Makros",
-      title: "Hauptmappe als XLSM erstellen",
+      group: "Vorbereitung",
+      title: "Arbeitsordner und Dateinamen anlegen",
       description:
-        "Erstelle die Excel-Hauptdatei Servicegradermittlung.xlsm. Lege die benoetigten Tabellenblaetter fuer SAP-Rohdaten, Berechnung, Ergebnis-Tabelle und Diagramm an. Speichere die Datei als makrofaehige Arbeitsmappe.",
-      expectedResult:
-        "Die XLSM-Datei existiert, enthaelt die benoetigten Blaetter und kann Makros ausfuehren.",
+        "Lege in deinem eigenen Arbeitsordner einen Exportordner an, zum Beispiel `C:\\Users\\<User>\\Documents\\SG\\`. Dieser definiert den lokalen Exportordner für die SAP-Exportdatei, den du später in deinem VBScript eintragen musst.",
+      expectedResult: "Exportordner ist angelegt und erreichbar.",
     },
     {
-      group: "Excel-Makros",
-      title: "Makro fuer SAP-Datenimport bauen",
-      description:
-        "Erstelle ein VBA-Makro nach dem Muster DatenkopierenSAP. Es sucht die exportierte SG-Datei fuer das Auswertungsdatum, oeffnet sie, kopiert die Rohdaten in die Hauptmappe und schliesst die Exportdatei wieder.",
+      group: "Excel: Files & Codes",
+      title: "Erstellung der Servicegradermittlung.xlsm Datei",
+      description: `Erstelle die Excel-Datei **Servicegradermittlung.xlsm** und speichere sie als Excel-Arbeitsmappe mit Makros. 
+
+Lege die im Code verwendeten Blätter \`Tabelle1\` und \`Tabelle2\` an; \`Tabelle1\` nimmt Rohdaten auf, \`Tabelle2\` enthält Berechnung und E-Mail-Bereiche. 
+
+Merke dir den Pfad zu dieser Datei für den späteren Einsatz in der PAD-Aktion **Excel starten**.`,
       expectedResult:
-        "Ein manueller Makrostart kopiert die SAP-Exportdaten reproduzierbar in das Rohdatenblatt.",
+        "Die Servicegradermittlung.xlsm Datei ist erstellt und erreichbar.",
     },
     {
-      group: "Excel-Makros",
-      title: "Makro fuer Datenbereinigung erstellen",
-      description:
-        "Erstelle ein Bereinigungsmakro nach dem Muster NeueBelegnummer. Normalisiere Belegnummern, Datumswerte und Uhrzeiten so, dass deine Berechnung keine manuelle Nacharbeit braucht.",
+      group: "Excel: Files & Codes",
+      title: "Makro NeueBelegnummer fuer die PAD-Aktion einfügen",
+      description: excelMacroStep(
+        "Die erste `Excel.RunMacro`-Aktion ruft **NeueBelegnummer** auf. Füge deshalb jetzt dieses Bereinigungsmakro in die **Servicegradermittlung.xlsm** ein. Es normalisiert Belegnummern, Datumswerte und Uhrzeiten vor dem Import.",
+        "NeueBelegnummer"
+      ),
       expectedResult:
-        "Die importierten SAP-Daten haben stabile Spaltenformate und koennen direkt weiterverarbeitet werden.",
+        "Die erste PAD-Makroaktion findet `NeueBelegnummer` und die Rohdatenformate sind vorbereitet.",
     },
     {
-      group: "Excel-Makros",
-      title: "Makro fuer Kennzahlenberechnung erstellen",
-      description:
-        "Erstelle das zentrale Berechnungsmakro nach dem Muster SGrechner. Zaehle Erreicht/Nicht Erreicht je Standort oder Kategorie, berechne die Quote und schreibe Tabelle sowie Diagrammdaten in das Ergebnisblatt.",
+      group: "Excel: Files & Codes",
+      title: "Makro DatenkopierenSAP fuer die PAD-Aktion einfügen",
+      description: excelMacroStep(
+        "Die zweite `Excel.RunMacro`-Aktion ruft **DatenkopierenSAP** auf. Das Makro erwartet die in **Schritt 14** erzeugte Datei `SG-<Datum>.xlsx`. Trage im Code denselben lokalen Exportordner aus **Schritt 05** und dasselbe Dateinamensformat ein.",
+        "DatenkopierenSAP"
+      ),
       expectedResult:
-        "Die Servicegrad-Tabelle zeigt Werte für LC1, LC3, LC6, LC8, LC9 und ein Gesamtergebnis.",
+        "Die zweite PAD-Makroaktion kopiert die SAP-Exportdaten reproduzierbar in das Rohdatenblatt.",
     },
     {
-      group: "Excel-Makros",
-      title: "Makro fuer Kennzahlenuebertragung erstellen",
-      description:
-        "Erstelle ein Makro nach dem Muster DatenUebertragung. Es oeffnet die zentrale Kennzahlen-Datei, sucht die Position fuer das Auswertungsdatum und schreibt die berechneten Werte fort.",
+      group: "Excel: Files & Codes",
+      title: "Makro SGrechner fuer die PAD-Aktion einfügen",
+      description: excelMacroStep(
+        "Die dritte `Excel.RunMacro`-Aktion ruft **SGrechner** auf. Füge den Berechnungscode in die Hauptmappe ein und prüfe die Blattnamen, Bereiche sowie die fünf Standorte LC1, LC3, LC6, LC8 und LC9.",
+        "SGrechner"
+      ),
       expectedResult:
-        "Die Kennzahlen-Datei wird automatisch aktualisiert, ohne bestehende Historie zu ueberschreiben.",
+        "Die dritte PAD-Makroaktion erzeugt Servicegrad-Tabelle, Gesamtergebnis und Diagrammdaten.",
     },
     {
-      group: "Excel-Makros",
-      title: "Makro fuer E-Mail-Versand erstellen",
-      description:
-        "Erstelle ein Outlook-Makro nach dem Muster Email. Fuege Tabelle und Diagramm aus Excel in eine HTML-Mail ein, setze Betreff und Verteiler und teste zuerst mit deiner eigenen Adresse.",
+      group: "Excel: Files & Codes",
+      title: "Makro DatenUebertragung fuer die PAD-Aktion einfügen",
+      description: excelMacroStep(
+        "Die vierte `Excel.RunMacro`-Aktion ruft **DatenUebertragung** auf. Lege vor dem Test die Kennzahlen-Datei an oder kopiere eine passende Vorlage in deinen Arbeitsordner. Sie benötigt ein Monatsblatt im Format `MMM JJ`, eine Datumsspalte B und das im Makro erwartete Diagramm. Ersetze den produktiven Netzwerkpfad im Makro durch den lokalen Pfad zu dieser Datei.",
+        "DatenUebertragung"
+      ),
       expectedResult:
-        "Eine Testmail enthaelt die aktuelle Ergebnis-Tabelle, das Diagramm und den korrekten Betreff.",
+        "Die vierte PAD-Makroaktion schreibt die berechneten Werte in die lokale Kennzahlen-Datei, ohne bestehende Historie zu überschreiben.",
     },
     {
-      group: "SAP VBScript",
-      title: "SAP GUI Scripting aktivieren",
-      description:
-        "Aktiviere in SAP GUI die Scripting-Unterstuetzung und pruefe, ob der SAP-Server Scripting erlaubt. Starte SAP neu und teste die spaetere Transaktion manuell, z.B. /LSGIT/VS_DLV_CHECK.",
+      group: "Excel: Files & Codes",
+      title: "Makro Email fuer die PAD-Aktion einfügen",
+      description: excelMacroStep(
+        "Die fünfte `Excel.RunMacro`-Aktion ruft **Email** auf. Füge das Makro ein und ersetze **To** und **CC** vor dem ersten Test ausschließlich durch deine eigene Testadresse. Prüfe außerdem, dass die Bereiche `Tabelle2!B12:Q19` und `Tabelle2!B22:Q45` in deiner Hauptmappe die gewünschten Ergebnisdaten und das Diagramm enthalten.",
+        "EMail"
+      ),
       expectedResult:
-        "SAP GUI Scripting ist nutzbar und die Transaktion laesst sich mit dem Ausfuehrungskonto oeffnen.",
+        "Die fünfte PAD-Makroaktion erstellt eine Testmail mit aktueller Tabelle, Diagramm und korrektem Betreff.",
     },
     {
-      group: "SAP VBScript",
-      title: "SAP-Ablauf aufzeichnen",
-      description:
-        "Nutze den SAP Script Recorder. Zeichne exakt die Schritte auf: System oeffnen, Transaktion starten, Selektionsdatum setzen, optionale Belegnummernfilter setzen, Layout auswaehlen und Export als Excel ausloesen.",
-      expectedResult:
-        "Eine VBS-Datei enthaelt den aufgezeichneten SAP-Ablauf von der Transaktion bis zum Exportdialog.",
-    },
-    {
-      group: "SAP VBScript",
-      title: "VBScript parametrisieren und stabilisieren",
-      description:
-        "Ersetze feste Testwerte im VBScript durch Variablen fuer Datum, Exportpfad und Dateiname. Entferne unnoetige Recorder-Zeilen, pruefe Fenster-IDs und fuege einfache Warte- oder Existenzpruefungen fuer SAP-Dialoge ein.",
-      expectedResult:
-        "Das SAP VBScript laeuft mehrfach hintereinander und schreibt die Exportdatei in den definierten Ordner.",
-    },
-    {
-      group: "Power Automate Desktop",
+      group: "Power Automate Desktop Flow",
       title: "PAD-Flow und Subflows anlegen",
-      description:
-        "Erstelle einen neuen Power Automate Desktop Flow. Lege Subflows nach dem Servicegrad-Muster an: Main, Get DateTime, Get SAP Data und SG Math and Email send. Main ruft die Subflows in genau dieser Reihenfolge auf.",
+      description: `Der PAD-Flow beschreibt den gesamten Prozessablauf. Erstelle zuerst einen [[neuen Flow|images/Servicegrad/NeuFlow.png]] (z.B. Servicegrad) und die [[Subflows|images/Servicegrad/NeuSubflow.png]]:
+
+- **Main**: Bestimmt in welcher Reihenfolge die Subflows durchlaufen sollen
+- **Get DateTime**: Definiert das benötigte Datum für die Servicegrad-Daten. Der technische Subflow heißt \`Get_DateTime_Variable\` und ruft **SAP_Process_BackToFriday** (wenn heute Montag ist) oder **SAP_Pocess_BackToYesterday** (wenn heute nicht Montag ist) auf.
+- **SAP_Process_BackToFriday**: Startet den SAP-Prozess und exportiert die Servicegrad-Daten
+- **SAP_Pocess_BackToYesterday**: Startet den SAP-Prozess und exportiert die Servicegrad-Daten
+- **Data_Preperation**: Berechnet den Servicegrad und formatiert den Inhalt für den E-Mail-Versand
+
+Richte [[Main|images/Servicegrad/SubflowStruktur.png]] so ein, dass er diese Subflows genau in dieser Reihenfolge aufruft. Baue ab jetzt jede weitere Tutorial-Aktion direkt in dem Subflow ein, in dem sie später läuft.`,
       expectedResult:
-        "Der PAD-Flow hat eine klare Struktur und bildet den gesamten Prozessablauf sichtbar ab.",
+        "Eine Power Automate Desktop Flow mit den Subflows Main, Get DateTime, Get SAP Data und SG Math and Email send hat eine klare Struktur und bildet den gesamten Prozessablauf sichtbar ab.",
     },
     {
-      group: "Power Automate Desktop",
+      group: "PAD-Flow: Get DateTime",
       title: "Datumsermittlung bauen",
-      description:
-        "Baue im Subflow Get DateTime die Datumslogik. Standard ist Vortag; montags wird auf Freitag zurueckgerechnet. Speichere Anzeigeformat, SAP-Format und Dateinamensformat in Variablen.",
+      description: `Baue den untenstehenden Flow in den zuvor erstellten Subflow „Get_DateTime_Variable“ ein oder importiere ihn direkt aus dem RAW-Code in diesen Subflow.
+
+Die enthaltene Logik ermittelt standardmäßig das Datum des Vortages. Fällt der aktuelle Tag auf einen Montag, wird stattdessen das Datum des vorherigen Freitags bestimmt.      
+
+${markdownSection(padMarkdown, "Get_DateTime_Variable")}`,
       expectedResult:
-        "Der Flow liefert fuer jeden Werktag das richtige Auswertungsdatum und den passenden Exportdateinamen.",
+        "Der Flow liefert für jeden Werktag das richtige Auswertungsdatum.",
     },
     {
-      group: "Power Automate Desktop",
-      title: "SAP VBScript aus PAD starten",
-      description:
-        "Baue den Subflow Get SAP Data. Starte SAP bzw. die VBS-Datei, uebergib Datum und Exportpfad, warte auf die Exportdatei und brich mit klarer Fehlermeldung ab, wenn die Datei nicht entsteht.",
+      group: "PAD-Flow: Get SAP Data",
+      title: "SAP-Prozess und Daten Export",
+      description: `Baue den untenstehenden Flow in den zuvor erstellten Subflow **SAP_Process_BackToFriday** ein oder importiere ihn direkt aus dem RAW-Code in diesen Subflow.
+
+Der Flow meldet sich im SAP-System an, startet den vorgesehenen SAP-Prozess und erzeugt die Exportdatei **SG-<Datum>.xlsx**.
+
+Passe im VBSkript die folgende Zeile entsprechend an, indem du den Pfad durch den in Schritt 05 definierten Zielpfad ersetzt:
+\`session.findById("wnd[1]/usr/ctxtDY_PATH").text = "C:\\Users\\5100LSS1\\Documents\\SG"\`
+
+${markdownSection(padMarkdown, "SAP_Process_BackToFriday")}`,
       expectedResult:
-        "PAD erzeugt den SAP-Export automatisch und erkennt fehlgeschlagene Exporte.",
+        "Der Subflow erstellt die Exportdatei mit dem erwarteten Namen im definierten Exportordner.",
     },
     {
-      group: "Power Automate Desktop",
-      title: "Excel-Makros aus PAD ausfuehren",
-      description:
-        "Baue den Subflow SG Math and Email send. Beende stoerende Excel-Instanzen, oeffne die XLSM-Datei, fuehre die Makros in Reihenfolge aus und schliesse Excel kontrolliert.",
+      group: "PAD-Flow: Berechnung und Email versand",
+      title: "Servicegrad Berechnung und Email versand",
+      description: `Baue den untenstehenden Flow in den zuvor erstellten Subflow **Data_Preperation** ein oder importiere ihn direkt aus dem RAW-Code in diesen Subflow.
+
+Der Flow öffnet die Datei **Servicegradermittlung.xlsm**, führt die Berechnung des Servicegrads durch und bereitet die Ergebnisse für den E-Mail-Versand auf.
+
+Stelle sicher, dass in der PAD-Aktion **Excel starten** der Dateipfad aus **Schritt 06** zur Datei **Servicegradermittlung.xlsm** hinterlegt ist.
+
+${markdownSection(padMarkdown, "Data_Preperation")}`,
       expectedResult:
-        "Ein PAD-Testlauf fuehrt Import, Berechnung, Kennzahlenuebertragung und E-Mail-Versand ohne manuelle Klicks aus.",
+        "Der Prozess versendet erfolgreich den Servicegrad-Bericht per E-Mail.",
     },
     {
       group: "Power Automate Cloud",

@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { type BrowserWindow, dialog } from "electron";
 import { getDbPath } from "@/main/db/database";
+import { stripTutorialHints } from "@/features/tutorial/parse-tutorial-text";
 import {
   buildFullExport,
   getProcess,
@@ -171,9 +172,13 @@ export function renderProcessMarkdown(
         lines.push(`### ${currentGroup}`);
         lines.push("");
       }
-      lines.push(`${i + 1}. **${step.title}** — ${step.description}`);
+      lines.push(
+        `${i + 1}. **${step.title}** — ${stripTutorialHints(step.description)}`
+      );
       if (step.expectedResult) {
-        lines.push(`   - _Erwartet:_ ${step.expectedResult}`);
+        lines.push(
+          `   - _Erwartet:_ ${stripTutorialHints(step.expectedResult)}`
+        );
       }
     });
     lines.push("");

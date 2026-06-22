@@ -4,7 +4,7 @@ import { formatTime } from "@/utils/format";
 import { cn } from "@/utils/tailwind";
 
 const LEVEL_STYLES = {
-  info: "text-foreground/85",
+  info: "text-zinc-200",
   warn: "text-warning",
   error: "text-destructive",
 } as const;
@@ -16,7 +16,7 @@ const SOURCE_LABELS = {
 } as const;
 
 const SOURCE_STYLES = {
-  info: "text-muted-foreground/50",
+  info: "text-zinc-400/70",
   warn: "text-warning",
   error: "text-destructive",
 } as const;
@@ -64,7 +64,7 @@ export function RunLogView({
           className={cn("flex gap-2 py-px", live && "animate-log-line")}
           key={log.id}
         >
-          <span className="shrink-0 text-muted-foreground/60">
+          <span className="shrink-0 text-zinc-400">
             {formatTime(log.timestamp)}
           </span>
           <span
