@@ -1,5 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
+  BoxesIcon,
   FolderIcon,
   GaugeIcon,
   LayersIcon,
@@ -12,6 +13,7 @@ import { cn } from "@/utils/tailwind";
 const NAV_ITEMS = [
   { to: "/", label: "Dashboard", icon: GaugeIcon, exact: true },
   { to: "/prozesse", label: "Prozesskatalog", icon: LayersIcon, exact: false },
+  { to: "/appkatalog", label: "Appkatalog", icon: BoxesIcon, exact: false },
   {
     to: "/einstellungen",
     label: "Einstellungen",

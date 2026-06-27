@@ -1,12 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import {
-  ArrowDownAZIcon,
-  PlusIcon,
-  SearchIcon,
-  StarIcon,
-  XIcon,
-} from "lucide-react";
+import { ArrowDownAZIcon, SearchIcon, StarIcon, XIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 import {
@@ -32,7 +26,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import ProcessEditorDialog from "@/features/process-editor/process-editor-dialog";
 import { ipc } from "@/ipc/manager";
 import { queryKeys, useCategories, useProcesses, useTags } from "@/lib/queries";
 import {
@@ -64,7 +57,6 @@ function CatalogPage() {
   const queryClient = useQueryClient();
 
   const [searchText, setSearchText] = useState(search.q ?? "");
-  const [editorOpen, setEditorOpen] = useState(false);
 
   // Debounce der Volltextsuche in den Suchparameter
   useEffect(() => {
@@ -144,10 +136,6 @@ function CatalogPage() {
             starten.
           </p>
         </div>
-        <Button onClick={() => setEditorOpen(true)} size="lg">
-          <PlusIcon data-icon="inline-start" />
-          Neuer Prozess
-        </Button>
       </div>
 
       <div
@@ -378,12 +366,6 @@ function CatalogPage() {
           </TableBody>
         </Table>
       </div>
-
-      <ProcessEditorDialog
-        onOpenChange={setEditorOpen}
-        open={editorOpen}
-        processId={null}
-      />
     </div>
   );
 }

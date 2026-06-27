@@ -6,6 +6,11 @@ import react, { reactCompilerPreset } from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
 export default defineConfig({
+  server: {
+    watch: {
+      ignored: ["**/docs/Apps/**"],
+    },
+  },
   plugins: [
     tanstackRouter({
       target: "react",

@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as EinstellungenRouteImport } from './routes/einstellungen'
+import { Route as AppkatalogRouteImport } from './routes/appkatalog'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProzesseIndexRouteImport } from './routes/prozesse.index'
 import { Route as ProzesseProcessIdRouteImport } from './routes/prozesse.$processId'
@@ -17,6 +18,11 @@ import { Route as ProzesseProcessIdRouteImport } from './routes/prozesse.$proces
 const EinstellungenRoute = EinstellungenRouteImport.update({
   id: '/einstellungen',
   path: '/einstellungen',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppkatalogRoute = AppkatalogRouteImport.update({
+  id: '/appkatalog',
+  path: '/appkatalog',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -37,12 +43,14 @@ const ProzesseProcessIdRoute = ProzesseProcessIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/appkatalog': typeof AppkatalogRoute
   '/einstellungen': typeof EinstellungenRoute
   '/prozesse/$processId': typeof ProzesseProcessIdRoute
   '/prozesse/': typeof ProzesseIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/appkatalog': typeof AppkatalogRoute
   '/einstellungen': typeof EinstellungenRoute
   '/prozesse/$processId': typeof ProzesseProcessIdRoute
   '/prozesse': typeof ProzesseIndexRoute
@@ -50,18 +58,30 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/appkatalog': typeof AppkatalogRoute
   '/einstellungen': typeof EinstellungenRoute
   '/prozesse/$processId': typeof ProzesseProcessIdRoute
   '/prozesse/': typeof ProzesseIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/einstellungen' | '/prozesse/$processId' | '/prozesse/'
+  fullPaths:
+    | '/'
+    | '/appkatalog'
+    | '/einstellungen'
+    | '/prozesse/$processId'
+    | '/prozesse/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/einstellungen' | '/prozesse/$processId' | '/prozesse'
+  to:
+    | '/'
+    | '/appkatalog'
+    | '/einstellungen'
+    | '/prozesse/$processId'
+    | '/prozesse'
   id:
     | '__root__'
     | '/'
+    | '/appkatalog'
     | '/einstellungen'
     | '/prozesse/$processId'
     | '/prozesse/'
@@ -69,6 +89,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppkatalogRoute: typeof AppkatalogRoute
   EinstellungenRoute: typeof EinstellungenRoute
   ProzesseProcessIdRoute: typeof ProzesseProcessIdRoute
   ProzesseIndexRoute: typeof ProzesseIndexRoute
@@ -81,6 +102,13 @@ declare module '@tanstack/react-router' {
       path: '/einstellungen'
       fullPath: '/einstellungen'
       preLoaderRoute: typeof EinstellungenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/appkatalog': {
+      id: '/appkatalog'
+      path: '/appkatalog'
+      fullPath: '/appkatalog'
+      preLoaderRoute: typeof AppkatalogRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -109,6 +137,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppkatalogRoute: AppkatalogRoute,
   EinstellungenRoute: EinstellungenRoute,
   ProzesseProcessIdRoute: ProzesseProcessIdRoute,
   ProzesseIndexRoute: ProzesseIndexRoute,

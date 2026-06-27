@@ -80,6 +80,18 @@ New-Item -ItemType Directory -Path $portableAppDir, $portableDataDir -Force | Ou
 Copy-Item -Path (Join-Path $packageDir.FullName "*") -Destination $portableAppDir -Recurse -Force
 Rename-Item -LiteralPath (Join-Path $portableAppDir $exe.Name) -NewName $PortableExeName -Force
 
+$sourceAppsDir = Join-Path $RootDir "docs\Apps"
+$portableAppsDir = Join-Path $portableAppDir "resources\portable-apps"
+if (Test-Path $sourceAppsDir) {
+  Write-Host "Kopiere portable Zusatz-Apps:"
+  Write-Host "  Quelle: $sourceAppsDir"
+  Write-Host "  Ziel:   $portableAppsDir"
+  New-Item -ItemType Directory -Path $portableAppsDir -Force | Out-Null
+  Copy-Item -Path (Join-Path $sourceAppsDir "*") -Destination $portableAppsDir -Recurse -Force
+} else {
+  Write-Warning "Keine Zusatz-Apps unter '$sourceAppsDir' gefunden. Appkatalog-Eintraege koennen dann nicht gestartet werden."
+}
+
 $portableDbPath = Join-Path $portableDataDir $DatabaseFileName
 Write-Host "Kopiere aktuelle SQLite-Datenbank:"
 Write-Host "  Quelle: $($sourceDb.FullName)"
@@ -132,6 +144,10 @@ Datenbank:
 Hinweis:
   Den gesamten Ordner 'portable' zusammenhalten, wenn die App auf USB-Stick,
   Netzlaufwerk oder einen anderen PC kopiert wird.
+
+Portable Zusatz-Apps:
+  Appkatalog-Apps liegen unter:
+  app\resources\portable-apps
 "@ | Set-Content -Path $readmePath -Encoding ASCII
 
 Write-Host ""

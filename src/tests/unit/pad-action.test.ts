@@ -76,6 +76,49 @@ describe("Power Automate Desktop action", () => {
     });
   });
 
+  test("seeds Rueckstandsliste with PAD action, tutorial, parameters and artifacts", async () => {
+    const { bootstrapRealProcesses } = await import(
+      "@/main/db/seed-servicegrad"
+    );
+    const {
+      getProcess,
+      getTutorialByProcess,
+      listParameters,
+      listTechnicalArtifacts,
+    } = await import("@/main/db/repository");
+    const { getDb } = await import("@/main/db/database");
+    const { RUECKSTANDSLISTE_PROCESS_NAME } = await import(
+      "@/main/db/processes/rueckstandsliste"
+    );
+
+    bootstrapRealProcesses();
+    bootstrapRealProcesses();
+
+    const row = getDb()
+      .prepare("SELECT id FROM processes WHERE name = ?")
+      .get(RUECKSTANDSLISTE_PROCESS_NAME) as { id: number };
+    const process = getProcess(row.id);
+
+    expect(process?.action).toMatchObject({
+      type: "pad",
+      padFlowName: "Rueckstandsliste",
+      padUrl: "ms-powerautomate:",
+    });
+    expect(getTutorialByProcess(row.id)?.title).toContain("Rueckstandsliste");
+    expect(listParameters(row.id).map((param) => param.key)).toContain(
+      "makro_import_datei"
+    );
+    expect(
+      listTechnicalArtifacts(row.id).map((artifact) => artifact.title)
+    ).toEqual(
+      expect.arrayContaining([
+        "SAP Scripting",
+        "RSl_create1_1_vom_Geschäft",
+        "CreateEmailWithLinks",
+      ])
+    );
+  });
+
   test("refreshes an unchanged seeded Servicegrad tutorial", async () => {
     const { bootstrapRealProcesses } = await import(
       "@/main/db/seed-servicegrad"

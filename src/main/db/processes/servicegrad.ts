@@ -342,9 +342,50 @@ export const servicegradTutorial = {
 
 Lege die im Code verwendeten Blätter \`Tabelle1\` und \`Tabelle2\` an; \`Tabelle1\` nimmt Rohdaten auf, \`Tabelle2\` enthält Berechnung und E-Mail-Bereiche. 
 
-Merke dir den Pfad zu dieser Datei für den späteren Einsatz in der PAD-Aktion **Excel starten**.`,
+Merke dir den Pfad zu dieser Datei für den späteren Einsatz in der PAD-Aktion **Excel starten**.
+
+In [[Tabelle 1|images/Servicegrad/SG-Columns.png]] sollten die Spalten A4 bis R4 mit den folgenden Bezeichnungen vorhanden sein:
+
+- A4: Werk
+- B4: Lagerort
+- C4: Vertriebsbeleg
+- D4: Angelegt am
+- E4: Uhrzeit
+- F4: Position (SD)
+- G4: Ladedatum
+- H4: Lade-Uhrzeit
+- I4: Transportdispostelle
+- J4: Transportnummer
+- K4: Angelegt am
+- L4: Uhrzeit
+- M4: Positionstyp
+- N4: Material
+- O4: Bezeichnung
+- P4: Materialart
+- Q4: Charge
+- R4: Bewertung
+
+In C2 sollte das zu bewertende Datum stehen mit der Formel \`=WENN(WOCHENTAG(HEUTE();2)=1;HEUTE()-3;HEUTE()-1)\`,
+
+In jede Zeile ab R5 bis R60000 sollte diese Formel stehen \`=WENN(Q5="";"";WENN(ISTLEER(K5);"Nicht Erreicht";WENN(G5=K5;WENN(H5>L5;"Erreicht";"Nicht Erreicht");WENN(G5>K5;"Erreicht";"Nicht Erreicht"))))\`
+Diese Formel ermittelt pro Zeile ob die Lieferungsposition erreicht wurde oder nicht.`,
       expectedResult:
         "Die Servicegradermittlung.xlsm Datei ist erstellt und erreichbar.",
+    },
+    {
+      group: "Excel: Files & Codes",
+      title: "VBA-Modul in Excel erstellen und Makro einfügen",
+      description: `Öffne die Datei **Servicegradermittlung.xlsm** und drücke **Alt + F11**, oder klicke unter dem Reiter **Entwicklertools** auf [[Visual Basic for Applications|images/Excel/Entwicklertool.png]] um den VBA-Editor zu öffnen.
+
+Wähle links im Projekt-Explorer die Arbeitsmappe **VBAProject (Servicegradermittlung.xlsm)** aus. Falls der Projekt-Explorer nicht sichtbar ist, blende ihn über **Ansicht > Projekt-Explorer** ein.
+
+Erstelle über [[Einfügen > Modul|images/Excel/ModulErstellen.png]] ein neues Standardmodul. Excel legt dadurch unter **Module** ein neues Modul an, zum Beispiel **Modul1**.
+
+Klicke dieses Modul doppelt an und füge den [[VBA-Code|images/Excel/SkriptEinfuegen.png]] des jeweiligen Makros vollständig in das leere Codefenster ein. Speichere anschließend die Arbeitsmappe wieder als **Excel-Arbeitsmappe mit Makros (*.xlsm)**.
+
+Wiederhole diesen Schritt für jedes weitere Makro oder füge mehrere Makros nacheinander in dasselbe Standardmodul ein, wenn sie gemeinsam in der Servicegrad-Datei liegen sollen.`,
+      expectedResult:
+        "In der Servicegradermittlung.xlsm existiert ein VBA-Standardmodul, in das Makros eingefügt und gespeichert werden können.",
     },
     {
       group: "Excel: Files & Codes",
@@ -360,7 +401,7 @@ Merke dir den Pfad zu dieser Datei für den späteren Einsatz in der PAD-Aktion 
       group: "Excel: Files & Codes",
       title: "Makro DatenkopierenSAP fuer die PAD-Aktion einfügen",
       description: excelMacroStep(
-        "Die zweite `Excel.RunMacro`-Aktion ruft **DatenkopierenSAP** auf. Das Makro erwartet die in **Schritt 14** erzeugte Datei `SG-<Datum>.xlsx`. Trage im Code denselben lokalen Exportordner aus **Schritt 05** und dasselbe Dateinamensformat ein.",
+        "Die zweite `Excel.RunMacro`-Aktion ruft **DatenkopierenSAP** auf. Das Makro erwartet die in **Schritt 15** erzeugte Datei `SG-<Datum>.xlsx`. Trage im Code denselben lokalen Exportordner aus **Schritt 05** und dasselbe Dateinamensformat ein.",
         "DatenkopierenSAP"
       ),
       expectedResult:
@@ -453,7 +494,7 @@ ${markdownSection(padMarkdown, "Data_Preperation")}`,
       group: "Power Automate Cloud",
       title: "Cloud-Flow als Scheduler erstellen",
       description:
-        "Erstelle in Power Automate Cloud einen geplanten Flow, z.B. Mo-Fr um 01:00 Uhr. Waehle die Aktion zum Starten des Desktop-Flows auf dem RPA-Rechner und verbinde sie mit dem PAD-Flow.",
+        "Erstelle in Power Automate Cloud einen geplanten Flow, z.B. Mo-Fr um 01:00 Uhr. Wähle die Aktion zum Starten des Desktop-Flows auf dem RPA-Rechner und verbinde sie mit dem PAD-Flow.",
       expectedResult:
         "Der Cloud-Flow kann den Desktop-Flow geplant oder testweise manuell starten.",
     },
@@ -483,19 +524,11 @@ ${markdownSection(padMarkdown, "Data_Preperation")}`,
     },
     {
       group: "Dokumentation",
-      title: "Servicegrad-Prozess in JOZI dokumentieren",
+      title: "JOZI Servicegrad-Prozess tutorial erfolgreich abgeschlossen",
       description:
-        "Erfasse für den Servicegrad-Prozess Business-Zweck, Systeme, Dateien, PAD-Flow, Cloud-Scheduler, SAP VBScript, Makros, Parameter, Runbook und Fehlerbehandlung in JOZI.",
+        "Herzlichen Glückwunsch! Du hast den Servicegrad-Prozess erfolgreich nachgebaut und getestet.",
       expectedResult:
-        "Der Servicegrad-Prozess ist in JOZI vollständig dokumentiert.",
-    },
-    {
-      group: "Dokumentation",
-      title: "Übergabe dokumentieren",
-      description:
-        "Ergänze lokale Besonderheiten wie deine gewählten Pfade, Zugänge und Ansprechpersonen. Führe eine zweite Person Schritt für Schritt durch den Servicegrad-Ablauf und passe unklare Stellen direkt an.",
-      expectedResult:
-        "Eine neue Person kann den Servicegrad-Prozess anhand der Dokumentation nachbauen und betreiben.",
+        "Du hast den Servicegrad-Prozess erfolgreich nachgebaut und getestet.",
     },
   ],
 };

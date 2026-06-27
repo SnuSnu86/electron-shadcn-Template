@@ -9,6 +9,14 @@ import {
 } from "./processes/servicegrad";
 import { servicegradTechnicalArtifacts } from "./processes/servicegrad-artifacts";
 import {
+  RUECKSTANDSLISTE_PROCESS_NAME,
+  rueckstandslisteAction,
+  rueckstandslisteInput,
+  rueckstandslisteParameters,
+  rueckstandslisteTutorial,
+} from "./processes/rueckstandsliste";
+import { rueckstandslisteTechnicalArtifacts } from "./processes/rueckstandsliste-artifacts";
+import {
   createProcess,
   deleteProcess,
   deleteTutorial,
@@ -24,6 +32,8 @@ import {
 
 const SERVICEGRAD_TUTORIAL_FINGERPRINT_KEY =
   "servicegrad.tutorial.seed-fingerprint";
+const RUECKSTANDSLISTE_TUTORIAL_FINGERPRINT_KEY =
+  "rueckstandsliste.tutorial.seed-fingerprint";
 const LEGACY_SERVICEGRAD_TUTORIAL_FINGERPRINTS = new Set([
   "6208431202d4b27cf35735ce8fc010a86c403793acbce38ddaf265efc321250e",
 ]);
@@ -54,13 +64,13 @@ function tutorialFingerprint(tutorial: TutorialContent): string {
   return createHash("sha256").update(JSON.stringify(content)).digest("hex");
 }
 
-function backfillServicegradAction(processId: number): void {
+function backfillProcessAction(processId: number, action: object): void {
   const db = getDb();
   const row = db
     .prepare("SELECT action_json FROM processes WHERE id = ?")
     .get(processId) as { action_json: string } | undefined;
   const current = row ? (JSON.parse(row.action_json) as object) : {};
-  const next = { ...current, ...servicegradAction };
+  const next = { ...current, ...action };
 
   if (JSON.stringify(current) === JSON.stringify(next)) {
     return;
@@ -71,12 +81,17 @@ function backfillServicegradAction(processId: number): void {
   ).run(JSON.stringify(next), processId);
 }
 
-/** Entfernt alle Prozesse außer dem echten Servicegrad-Eintrag. */
+/** Entfernt alle Prozesse außer dem echten Prozesskatalog. */
 export function purgeMockProcesses(): void {
   const db = getDb();
   const stale = db
-    .prepare("SELECT id FROM processes WHERE name != ?")
-    .all(SERVICEGRAD_PROCESS_NAME) as { id: number }[];
+    .prepare(
+      `SELECT id FROM processes
+       WHERE name NOT IN (?, ?)`
+    )
+    .all(SERVICEGRAD_PROCESS_NAME, RUECKSTANDSLISTE_PROCESS_NAME) as {
+    id: number;
+  }[];
 
   for (const { id } of stale) {
     deleteProcess(id);
@@ -85,42 +100,91 @@ export function purgeMockProcesses(): void {
 
 /** Legt den Servicegrad-Prozess an, sofern er noch nicht in der DB existiert. */
 export function seedServicegradIfMissing(): void {
+  seedProcessIfMissing({
+    action: servicegradAction,
+    fingerprintKey: SERVICEGRAD_TUTORIAL_FINGERPRINT_KEY,
+    input: servicegradInput,
+    legacyFingerprints: LEGACY_SERVICEGRAD_TUTORIAL_FINGERPRINTS,
+    name: SERVICEGRAD_PROCESS_NAME,
+    parameters: servicegradParameters,
+    technicalArtifacts: servicegradTechnicalArtifacts,
+    tutorial: servicegradTutorial,
+  });
+}
+
+/** Legt den Rueckstandsliste-Prozess an, sofern er noch nicht in der DB existiert. */
+export function seedRueckstandslisteIfMissing(): void {
+  seedProcessIfMissing({
+    action: rueckstandslisteAction,
+    fingerprintKey: RUECKSTANDSLISTE_TUTORIAL_FINGERPRINT_KEY,
+    input: rueckstandslisteInput,
+    legacyFingerprints: new Set(),
+    name: RUECKSTANDSLISTE_PROCESS_NAME,
+    parameters: rueckstandslisteParameters,
+    technicalArtifacts: rueckstandslisteTechnicalArtifacts,
+    tutorial: rueckstandslisteTutorial,
+  });
+}
+
+function seedProcessIfMissing({
+  action,
+  fingerprintKey,
+  input,
+  legacyFingerprints,
+  name,
+  parameters,
+  technicalArtifacts,
+  tutorial,
+}: {
+  action: object;
+  fingerprintKey: string;
+  input: Parameters<typeof createProcess>[0];
+  legacyFingerprints: Set<string>;
+  name: string;
+  parameters: Omit<Parameters<typeof upsertParameter>[0], "processId">[];
+  technicalArtifacts: Parameters<typeof replaceTechnicalArtifacts>[1];
+  tutorial: TutorialContent;
+}): void {
   const db = getDb();
   const existing = db
     .prepare("SELECT id FROM processes WHERE name = ? LIMIT 1")
-    .get(SERVICEGRAD_PROCESS_NAME) as { id: number } | undefined;
+    .get(name) as { id: number } | undefined;
 
-  const processId = existing?.id ?? createProcess(servicegradInput);
+  const processId = existing?.id ?? createProcess(input);
 
-  backfillServicegradAction(processId);
+  backfillProcessAction(processId, action);
 
   if (listTechnicalArtifacts(processId).length === 0) {
-    replaceTechnicalArtifacts(processId, servicegradTechnicalArtifacts);
+    replaceTechnicalArtifacts(processId, technicalArtifacts);
   }
 
   if (existing) {
-    syncServicegradTutorial(processId);
+    syncTutorial(processId, tutorial, fingerprintKey, legacyFingerprints);
     return;
   }
 
-  for (const param of servicegradParameters) {
+  for (const param of parameters) {
     upsertParameter({ ...param, processId });
   }
 
-  syncServicegradTutorial(processId);
+  syncTutorial(processId, tutorial, fingerprintKey, legacyFingerprints);
 }
 
-function syncServicegradTutorial(processId: number): void {
+function syncTutorial(
+  processId: number,
+  tutorial: TutorialContent,
+  fingerprintKey: string,
+  legacyFingerprints: Set<string>
+): void {
   const existingTutorial = getTutorialByProcess(processId);
-  const currentFingerprint = tutorialFingerprint(servicegradTutorial);
+  const currentFingerprint = tutorialFingerprint(tutorial);
 
   if (existingTutorial) {
     const existingFingerprint = tutorialFingerprint(existingTutorial);
-    const seededFingerprint = getSetting(SERVICEGRAD_TUTORIAL_FINGERPRINT_KEY);
+    const seededFingerprint = getSetting(fingerprintKey);
     const isUnchangedSeed = seededFingerprint === existingFingerprint;
     const isKnownLegacySeed =
-      seededFingerprint === null &&
-      LEGACY_SERVICEGRAD_TUTORIAL_FINGERPRINTS.has(existingFingerprint);
+      seededFingerprint === null && legacyFingerprints.has(existingFingerprint);
 
     if (!(isUnchangedSeed || isKnownLegacySeed)) {
       return;
@@ -131,11 +195,11 @@ function syncServicegradTutorial(processId: number): void {
 
   const tutorialId = upsertTutorial(
     processId,
-    servicegradTutorial.title,
-    servicegradTutorial.description
+    tutorial.title,
+    tutorial.description
   );
 
-  servicegradTutorial.steps.forEach((step, i) => {
+  tutorial.steps.forEach((step, i) => {
     upsertStep({
       tutorialId,
       sortOrder: i,
@@ -147,11 +211,12 @@ function syncServicegradTutorial(processId: number): void {
     });
   });
 
-  setSetting(SERVICEGRAD_TUTORIAL_FINGERPRINT_KEY, currentFingerprint);
+  setSetting(fingerprintKey, currentFingerprint);
 }
 
 /** Mock-Prozesse entfernen und echten Katalog sicherstellen. */
 export function bootstrapRealProcesses(): void {
   purgeMockProcesses();
   seedServicegradIfMissing();
+  seedRueckstandslisteIfMissing();
 }

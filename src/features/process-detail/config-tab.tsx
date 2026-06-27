@@ -377,7 +377,7 @@ export function ConfigTab({ process }: { process: ProcessDetail }) {
           )}
           <p className="text-[0.6875rem] text-muted-foreground">
             Platzhalter wie {"{{schluessel}}"} werden beim Start durch
-            Parameterwerte ersetzt. Bearbeitung über „Prozess bearbeiten".
+            Parameterwerte ersetzt. Die Prozessstruktur wird zentral gepflegt.
           </p>
         </CardContent>
       </Card>

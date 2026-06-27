@@ -2,12 +2,11 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   ChevronLeftIcon,
   FileDownIcon,
+  FileTextIcon,
   GraduationCapIcon,
   MoreVerticalIcon,
-  PencilIcon,
   PlayIcon,
   StarIcon,
-  Trash2Icon,
   UserIcon,
   WrenchIcon,
 } from "lucide-react";
@@ -18,16 +17,6 @@ import {
   ActionTypeBadge,
   ProcessStatusBadge,
 } from "@/components/status-indicators";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -43,7 +32,6 @@ import { RunbookTab } from "@/features/process-detail/runbook-tab";
 import { RunsTab } from "@/features/process-detail/runs-tab";
 import { StartRunDialog } from "@/features/process-detail/start-run-dialog";
 import { TechnicalDetailsTab } from "@/features/process-detail/technical-details-tab";
-import ProcessEditorDialog from "@/features/process-editor/process-editor-dialog";
 import { TutorialTab } from "@/features/tutorial/tutorial-tab";
 import { ipc } from "@/ipc/manager";
 import {
@@ -78,8 +66,6 @@ function ProcessDetailPage() {
   const invalidate = useInvalidateProcessData();
 
   const [startOpen, setStartOpen] = useState(false);
-  const [editorOpen, setEditorOpen] = useState(false);
-  const [deleteOpen, setDeleteOpen] = useState(false);
   const [wizardOpen, setWizardOpen] = useState(false);
 
   if (isLoading) {
@@ -122,15 +108,21 @@ function ProcessDetailPage() {
       processId: id,
     });
     if (file) {
-      toast.success("Runbook exportiert", { description: file });
+      toast.success("Dokumentation als Markdown exportiert", {
+        description: file,
+      });
     }
   };
 
-  const deleteProcess = async () => {
-    await ipc.client.catalog.deleteProcess({ id });
-    invalidate();
-    toast.success(`Prozess „${process.name}" gelöscht`);
-    navigate({ to: "/prozesse", search: {} });
+  const exportPdf = async () => {
+    const file = await ipc.client.workspace.exportProcessPdf({
+      processId: id,
+    });
+    if (file) {
+      toast.success("Dokumentation als PDF exportiert", {
+        description: file,
+      });
+    }
   };
 
   return (
@@ -233,21 +225,20 @@ function ProcessDetailPage() {
                   <MoreVerticalIcon />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setEditorOpen(true)}>
-                  <PencilIcon />
-                  Prozess bearbeiten
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={exportMarkdown}>
-                  <FileDownIcon />
-                  Runbook als Markdown
+              <DropdownMenuContent align="end" className="w-60">
+                <DropdownMenuItem
+                  className="whitespace-nowrap"
+                  onClick={exportMarkdown}
+                >
+                  <FileTextIcon />
+                  Download Doku als Markdown
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  onClick={() => setDeleteOpen(true)}
-                  variant="destructive"
+                  className="whitespace-nowrap"
+                  onClick={exportPdf}
                 >
-                  <Trash2Icon />
-                  Prozess löschen
+                  <FileDownIcon />
+                  Download Doku als PDF
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -330,36 +321,6 @@ function ProcessDetailPage() {
         open={startOpen}
         process={process}
       />
-
-      {editorOpen && (
-        <ProcessEditorDialog
-          onOpenChange={setEditorOpen}
-          open={editorOpen}
-          processId={id}
-        />
-      )}
-
-      <AlertDialog onOpenChange={setDeleteOpen} open={deleteOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Prozess wirklich löschen?</AlertDialogTitle>
-            <AlertDialogDescription>
-              „{process.name}" wird inklusive aller Parameter, Runs, Logs und
-              Tutorials endgültig gelöscht. Diese Aktion kann nicht rückgängig
-              gemacht werden.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-destructive text-white hover:bg-destructive/80"
-              onClick={deleteProcess}
-            >
-              Endgültig löschen
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }

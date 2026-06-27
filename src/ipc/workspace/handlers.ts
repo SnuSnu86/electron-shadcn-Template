@@ -5,6 +5,7 @@ import {
   backupDatabase,
   exportAllJson,
   exportMarkdown,
+  exportPdf,
 } from "@/main/export/exporter";
 import { ipcContext } from "../context";
 
@@ -20,6 +21,11 @@ export const exportProcessMarkdown = os
   .handler(({ context, input }) =>
     exportMarkdown(context.window, input.processId)
   );
+
+export const exportProcessPdf = os
+  .use(ipcContext.mainWindowContext)
+  .input(z.object({ processId: z.number().int().positive().optional() }))
+  .handler(({ context, input }) => exportPdf(context.window, input.processId));
 
 export const backupDb = os
   .use(ipcContext.mainWindowContext)
